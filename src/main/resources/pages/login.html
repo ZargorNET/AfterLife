@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>AfterLife - Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="/src/main/resources/css/propeller.min.css" rel="stylesheet">
+    <link href="/src/main/resources/css/afterlife_login.min.css" rel="stylesheet">
+    <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport">
+</head>
+<body>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="/js/url.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/propeller.min.js"></script>
+<script src='https://www.google.com/recaptcha/api.js?onload=CaptchaCallback&render=explicit' async defer></script>
+<div id="main" class="login-main">
+    <form class="login-form" method="post">
+        <div class="pmd-card pmd-z-depth text-center">
+            <div class="pmd-card-title text-center">
+                <img src="/src/main/resources/data/logo.jpg" alt="Logo" width="100" height="100">
+                <h3><span id="infoText">Melde dich an bei <strong>AfterLife</strong></span></h3>
+            </div>
+            <!--LOGIN-->
+            <div class="pmd-card-body" id="login">
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="logName" class="control-label pmd-input-group-label">Username</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">perm_identity</i></div>
+                        <input type="text" class="form-control" name="name" id="logName" maxlength="24"
+                               pattern="[A-Za-z0-9\-]+" title="A-Z 0-9 -" required>
+                    </div>
+                </div>
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="logPassword" class="control-label pmd-input-group-label">Passwort</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">lock_outline</i></div>
+                        <input type="password" class="form-control" name="password" id="logPassword" maxlength="100"
+                               pattern="[A-Za-z0-9\-_#]+" title="A-Z 0-9 - _ #" required>
+                    </div>
+                </div>
+
+                <div class="pmd-card-footer">
+                    <div class="form-group">
+                        <div class="checkbox pull-left">
+                            <label class="pmd-checkbox pmd-checkbox-ripple-effect">
+                                <input type="checkbox" checked="" value="" id="logStayLogged">
+                                <span class="pmd-checkbox"> Angemeldet bleiben</span>
+                            </label>
+                        </div>
+                        <span class="pull-right" style="padding-top:8px;">
+							<a href="javascript:void(0);" class="login-pw">Passwort vergessen?</a>
+						</span>
+                    </div>
+                    <a href="javascript:void(0)" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
+                       style="background-color: limegreen" onclick="loginButtonClick()">Anmelden</a>
+                    <p class="redirection-link">Du hast keinen Account?
+                        <a href="javascript:void(0);" class="login-register">Erstelle Dir jetzt einen!</a></p>
+                </div>
+            </div>
+            <!--REGISTER-->
+            <div class="pmd-card-body" id="register" style="display: none;">
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="regName" class="control-label pmd-input-group-label">Username</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">perm_identity</i></div>
+                        <input type="text" class="form-control" name="name" id="regName" maxlength="24"
+                               pattern="[A-Za-z0-9\-]+" title="A-Z 0-9 -" required formnovalidate>
+                    </div>
+                </div>
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="regEmail" class="control-label pmd-input-group-label">Email</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">email</i></div>
+                        <input type="email" class="form-control" name="email" id="regEmail" maxlength="50"
+                               pattern="[A-Za-z0-9_\-]+@{1}[A-Za-z0-9]+\.{1}[A-Za-z]+" title="Gültige Email-Adresse"
+                               required formnovalidate>
+                    </div>
+                </div>
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="regPassword" class="control-label pmd-input-group-label">Passwort</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">lock_outline</i></div>
+                        <input type="password" class="form-control" name="password" id="regPassword" maxlength="100"
+                               pattern="[A-Za-z0-9\-_#]+" title="A-Z 0-9 - _ #" required formnovalidate>
+                    </div>
+                </div>
+                <div id="regCaptcha" class="recaptcha"></div>
+                <div class="pmd-card-footer">
+                    <a href="javascript:void(0);" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
+                       style="background-color: limegreen" onclick="registerButtonClick()">Registrieren</a>
+                    <p class="redirection-link">Du hast schon einen Account?
+                        <a href="javascript:void(0);" class="register-login">Melde Dich an!</a></p>
+                </div>
+            </div>
+            <!--PASSWORDZURUECKSETUNG-->
+            <div class="pmd-card-body" id="passwordReset" style="display: none">
+                <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
+                    <label for="pwEmail" class="control-label pmd-input-group-label">Email</label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">email</i></div>
+                        <input type="email" class="form-control" name="email" id="pwEmail" maxlength="50"
+                               pattern="[A-Za-z0-9_\-]+@{1}[A-Za-z0-9]+\.{1}[A-Za-z]+" title="Gültige Email-Adresse"
+                               required formnovalidate>
+                    </div>
+                </div>
+                <div id="pwCaptcha" class="recaptcha"></div>
+                <div class="pmd-card-footer">
+                    <a href="javascript:void(0);" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
+                       style="background-color: limegreen" onclick="passwordButtonClick()">Zurücksetzen</a>
+                    <p class="redirection-link">Du weißt Dein Passwort?
+                        <a href="javascript:void(0);" class="pw-login">Melde Dich an!</a></p>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="login-footer text-center">
+        <p>Made with &heartsuit; by <strong><a href="https://zargor.net" target="_blank">Zargor</a></strong></p>
+    </div>
+    <button type="button" style="overflow: hidden; display: none; position: absolute" data-positionX="right"
+            data-positionY="top" data-effect="fadeInUp" data-duration="7500" data-message="" data-type="error"
+            id="alertBtn"
+            class="pmd-alert-toggle"></button>
+</div>
+<script type="text/javascript">
+    var siteKey = "6LfctQkUAAAAAMTvbHfqEtTN1EIVJhlxX2sI2CyB";
+    var pwCaptcha;
+    var regCaptcha;
+    var CaptchaCallback = function () {
+        pwCaptcha = grecaptcha.render('pwCaptcha', {'sitekey': siteKey});
+        regCaptcha = grecaptcha.render('regCaptcha', {'sitekey': siteKey});
+    };
+</script>
+<script defer>
+    var alertBtn = $("#alertBtn");
+    var form = $(".login-form")[0];
+    $(document).ready(function () {
+        if (url("?needLogin") !== undefined) {
+            alertBtn.attr('data-message', "Du musst Dich erst einloggen!");
+            alertBtn.attr('data-type', "error");
+            alertBtn.trigger("click")
+        }
+
+    });
+    function loginButtonClick() {
+        $.ajax({
+            url: "/login",
+            type: "POST",
+            contentType: "text/plain;charset=utf-8",
+            data: {
+                name: $("#logName").val(),
+                password: $("#logPassword").val(),
+                stayLogged: $("#logStayLogged").is(":checked")
+            },
+            success: function () {
+                alertBtn.attr('data-message', "Erfolg!");
+                alertBtn.attr('data-type', 'success');
+                alertBtn.trigger("click");
+                setTimeout(function () {
+                    window.location.href = "/dashboard"
+                }, 4000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 0) {
+                    alertBtn.attr('data-message', "Verbindung zum Server nicht möglich! Versuche es später wieder.");
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                } else {
+                    alertBtn.attr('data-message', xhr.responseText);
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                }
+            },
+            timeout: 5000
+        });
+    }
+    function registerButtonClick() {
+        $.ajax({
+            url: "/register",
+            type: "POST",
+            contentType: "text/plain;charset=utf-8",
+            data: {
+                name: $("#regName").val(),
+                email: $("#regEmail").val(),
+                "recaptcha": grecaptcha.getResponse(regCaptcha),
+                password: $("#regPassword").val()
+            },
+            success: function () {
+                alertBtn.attr('data-message', "Erfolg!");
+                alertBtn.attr('data-type', 'success');
+                alertBtn.trigger("click");
+                setTimeout(function () {
+                    window.location.href = "/dashboard"
+                }, 4000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 0) {
+                    alertBtn.attr('data-message', "Verbindung zum Server nicht möglich! Versuche es später wieder.");
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                } else {
+                    alertBtn.attr('data-message', xhr.responseText);
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                }
+            },
+            timeout: 5000
+        });
+    }
+    function passwordButtonClick() {
+        $.ajax({
+            url: "/passwordreset",
+            type: "POST",
+            contentType: "text/plain;charset=utf-8",
+            data: {
+                email: $("#pwEmail").val(),
+                "recaptcha": grecaptcha.getResponse(pwCaptcha),
+            },
+            success: function () {
+                alertBtn.attr('data-message', "Erfolg!");
+                alertBtn.attr('data-type', 'success');
+                alertBtn.trigger("click");
+                setTimeout(function () {
+                    window.location.href = "/dashboard"
+                }, 4000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 0) {
+                    alertBtn.attr('data-message', "Verbindung zum Server nicht möglich! Versuche es später wieder.");
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                } else {
+                    alertBtn.attr('data-message', xhr.responseText);
+                    alertBtn.attr('data-type', "error");
+                    alertBtn.trigger("click")
+                }
+            },
+            timeout: 5000
+        });
+    }
+</script>
+<script defer>
+    var login = $("#login");
+    var register = $("#register");
+    var pwreset = $("#passwordReset");
+    var infoText = $("#infoText");
+    $(document).ready(function () {
+        $(".login-register").click(function () {
+            login.fadeOut(500, function () {
+                register.fadeIn(500);
+            });
+            infoText.fadeOut(500, function () {
+                infoText.html("Registriere dich bei <strong>AfterLife</strong>");
+                infoText.fadeIn(500);
+            });
+        });
+        $(".register-login").click(function () {
+            register.fadeOut(500, function () {
+                login.fadeIn(500);
+            });
+            infoText.fadeOut(500, function () {
+                infoText.html("Melde dich an bei <strong>AfterLife</strong>");
+                infoText.fadeIn(500);
+            });
+        });
+        $(".login-pw").click(function () {
+            login.fadeOut(500, function () {
+                pwreset.fadeIn(500);
+            });
+            infoText.fadeOut(500, function () {
+                infoText.html("<strong>Passwortzurücksetzung</strong><br />Fülle das Feld unten aus & wir werden Dir eine Email schicken :)!");
+                infoText.fadeIn(500);
+            });
+        });
+        $(".pw-login").click(function () {
+            pwreset.fadeOut(500, function () {
+                login.fadeIn(500);
+            });
+            infoText.fadeOut(500, function () {
+                infoText.html("Melde dich an bei <strong>AfterLife</strong>");
+                infoText.fadeIn(500);
+            });
+        });
+    });
+</script>
+</body>
+</html>
