@@ -1,0 +1,42 @@
+#     _     __ _            _     _  __
+#    / \   / _| |_ ___ _ __| |   (_)/ _| ___
+#   / _ \ | |_| __/ _ \ '__| |   | | |_ / _ \
+#  / ___ \|  _| ||  __/ |  | |___| |  _|  __/
+# /_/   \_\_|  \__\___|_|  |_____|_|_|  \___|
+#
+# Thanks for using AfterLife!
+# Made by: Zargor @ 2017
+# Source: https://github.com/ZargorNET/AfterLife
+# License: Apache License 2.0
+# Twitter: https://twitter.com/ZargorNET
+# Website: https://zargor.net
+#
+
+
+# MongoDB configuration:
+mongodb_username: "afterlife"
+mongodb_password: "password"
+mongodb_database: "afterlife"
+mongodb_host: "127.0.0.1"
+mongodb_port: 27017
+
+
+# Webserver configuration
+webserver_port: 8080
+webserver_host: 127.0.0.1
+# For non-local use:
+# webserver_host: 0.0.0.0
+
+# Passwords
+# Warning! Don't lose this salt! If you're losing it, users can't login anymore.
+password_salt: RANDOM_SALT
+# Valid types: BCrypt (recommended),SHA-512, SHA-256
+password_method: BCrypt
+
+# Googles Recaptcha
+grecaptcha_public_key: "your_key"
+grecaptcha_private_key: "your_secure_key"
+
+
+# Do not change!
+cfg_version: 1

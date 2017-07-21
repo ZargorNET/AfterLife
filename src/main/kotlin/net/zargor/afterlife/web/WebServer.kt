@@ -20,9 +20,9 @@ import net.zargor.afterlife.web.mongodb.MongoDB
 /**
  * Mainclass
  */
-class WebServer(address : String, port : Int) {
+class WebServer() {
     val config : Config = Config()
-    val mongoDB : MongoDB = MongoDB(config.prop)
+    val mongoDB : MongoDB = MongoDB(config)
     val handler = HttpHandler(this,this.javaClass.`package`.name + ".pages")
     val isEpollAvailable : Boolean = Epoll.isAvailable()
     val bootstrap : ServerBootstrap = ServerBootstrap()
@@ -44,7 +44,7 @@ class WebServer(address : String, port : Int) {
                             ch?.pipeline()?.addAfter("aggregator", "handler", HttpRequestHandler(this@WebServer))
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true)
-            channel = bootstrap.bind(address, port).sync().channel()
+            channel = bootstrap.bind(config.config["webserver_host"] as String, config.config["webserver_port"] as Int).sync().channel()
             println("HTTP-Server started")
             channel.closeFuture().sync()
         } finally {
@@ -55,5 +55,5 @@ class WebServer(address : String, port : Int) {
 }
 
 fun main(args : Array<String>) {
-  WebServer("0.0.0.0", 8080)
+    WebServer()
 }
