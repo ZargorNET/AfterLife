@@ -1,7 +1,7 @@
 package net.zargor.afterlife.web.objects
 
-import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
+import org.apache.commons.lang3.builder.HashCodeBuilder
 
 /**
  * Simple user

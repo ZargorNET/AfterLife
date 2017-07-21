@@ -7,4 +7,4 @@ import net.zargor.afterlife.web.objects.GroupPermissions
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class WebRequest(val route: String, val permission: GroupPermissions)
+annotation class WebRequest(val route : String, val needToLogged : Boolean, val groupNeededRights : Array<GroupPermissions>)

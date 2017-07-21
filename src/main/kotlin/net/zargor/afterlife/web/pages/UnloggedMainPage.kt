@@ -2,21 +2,20 @@ package net.zargor.afterlife.web.pages
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.http.*
-import io.netty.handler.codec.http.cookie.Cookie
-import net.zargor.afterlife.web.objects.GroupPermissions
+import io.netty.handler.codec.http.DefaultFullHttpResponse
+import io.netty.handler.codec.http.HttpHeaderNames
+import io.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.HttpVersion
 import net.zargor.afterlife.web.IWebRequest
 import net.zargor.afterlife.web.WebRequest
-import net.zargor.afterlife.web.WebServer
-import org.jtwig.JtwigTemplate
+import net.zargor.afterlife.web.objects.FullHttpReq
 import org.jtwig.JtwigModel
+import org.jtwig.JtwigTemplate
 
-
-
-@WebRequest("/", GroupPermissions.NONE)
+@WebRequest("/", false, emptyArray())
 class UnloggedMainPage : IWebRequest{
-    override fun onRequest(main : WebServer, ctx : ChannelHandlerContext, req : FullHttpRequest, cookies : Set<Cookie>, group : GroupPermissions, args : Map<String, String>?) : DefaultFullHttpResponse {
-        if(group != GroupPermissions.NONE){
+    override fun onRequest(ctx : ChannelHandlerContext, req : FullHttpReq) : DefaultFullHttpResponse {
+        if (req.group != null) {
             val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY)
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
             return res

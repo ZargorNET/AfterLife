@@ -3,27 +3,24 @@ package net.zargor.afterlife.web.pages
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
-import io.netty.handler.codec.http.cookie.Cookie
 import io.netty.handler.codec.http.multipart.Attribute
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
-import net.zargor.afterlife.web.PasswordEncrypt
-import net.zargor.afterlife.web.objects.GroupPermissions
 import net.zargor.afterlife.web.IWebRequest
+import net.zargor.afterlife.web.PasswordEncrypt
 import net.zargor.afterlife.web.WebRequest
-import net.zargor.afterlife.web.WebServer
+import net.zargor.afterlife.web.objects.FullHttpReq
 import org.bson.Document
 
 /**
  * Created by Zargor on 10.07.2017.
  */
-@WebRequest("/login", GroupPermissions.NONE)
+@WebRequest("/login", false, emptyArray())
 class Login : IWebRequest {
     //TODO
     private val secure : Boolean = false
 
-
-    override fun onRequest(main : WebServer, ctx : ChannelHandlerContext, req : FullHttpRequest, cookies : Set<Cookie>, group : GroupPermissions, args : Map<String, String>?) : DefaultFullHttpResponse {
-        if (group != GroupPermissions.NONE) {
+    override fun onRequest(ctx : ChannelHandlerContext, req : FullHttpReq) : DefaultFullHttpResponse {
+        if (req.group != null) {
             val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER.retain())
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
             return res
@@ -56,7 +53,7 @@ class Login : IWebRequest {
                     val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Zu viele Zeichen in einer Textbox!".toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
-                val player = main.mongoDB.playerColl?.find(Document("name", name.toLowerCase()))?.first()
+                val player = req.main.mongoDB.playerColl?.find(Document("name", name.toLowerCase()))?.first()
                 if (player == null) {
                     val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("User nicht gefunden".toByteArray(Charsets.UTF_8)).retain())
                     return res
@@ -74,7 +71,7 @@ class Login : IWebRequest {
                     return res
                 }
                 val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER.retain())
-                res.headers().add(HttpHeaderNames.SET_COOKIE, main.handler.sessionM.createCookieString(name,player["group"].toString(),secure))
+                res.headers().add(HttpHeaderNames.SET_COOKIE, req.main.handler.sessionM.createCookieString(name, player["group"].toString(), secure))
                 res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
                 return res
             } else {

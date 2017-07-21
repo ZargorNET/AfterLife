@@ -2,7 +2,6 @@ package net.zargor.afterlife.web
 
 import com.mongodb.util.JSON
 import net.zargor.afterlife.web.objects.Group
-import net.zargor.afterlife.web.objects.Session
 import org.bson.Document
 
 /**

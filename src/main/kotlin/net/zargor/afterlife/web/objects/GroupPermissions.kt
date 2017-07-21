@@ -4,6 +4,8 @@ package net.zargor.afterlife.web.objects
  * Created by Zargor on 07.07.2017.
  */
 enum class GroupPermissions {
+    //Non extra rights
+    NONE,
     //Username, Password, informations
     EDIT_USERS,
     EDIT_TOURNEYS,

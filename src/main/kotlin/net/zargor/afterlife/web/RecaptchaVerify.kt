@@ -1,21 +1,13 @@
 package net.zargor.afterlife.web
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import org.apache.http.NameValuePair
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.DefaultHttpClient
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.util.EntityUtils
-import sun.net.www.http.HttpClient
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.message.BasicNameValuePair
-import java.util.ArrayList
 import com.google.gson.JsonParser
-import com.google.gson.JsonElement
-
+import org.apache.http.NameValuePair
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.util.EntityUtils
+import java.util.*
 
 /**
  * Checks if the Recaptcha is valid

@@ -1,8 +1,7 @@
 package net.zargor.afterlife.web.objects
 
-import io.netty.buffer.ByteBuf
-import io.netty.handler.codec.DecoderResult
-import io.netty.handler.codec.http.*
+import io.netty.handler.codec.http.DefaultFullHttpRequest
+import io.netty.handler.codec.http.HttpHeaderNames
 import io.netty.handler.codec.http.cookie.Cookie
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder
 import io.netty.handler.codec.http.multipart.Attribute

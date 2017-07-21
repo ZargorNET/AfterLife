@@ -5,9 +5,8 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
-import io.netty.handler.codec.http.cookie.Cookie
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder
-import net.zargor.afterlife.web.objects.GroupPermissions
+import net.zargor.afterlife.web.objects.FullHttpReq
+import net.zargor.afterlife.web.objects.Group
 import org.apache.commons.io.IOUtils
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -65,27 +64,22 @@ class HttpHandler(val webServer : WebServer, val packagePath : String) {
         if (clazz == null) {
             clazz = Class.forName(packagePath + ".404Page") as Class<in IWebRequest>
         }
+        val newFullHttpReq = FullHttpReq(req as DefaultFullHttpRequest, webServer)
         val anno : WebRequest = clazz.getDeclaredAnnotation(WebRequest::class.java)
-        var logged : GroupPermissions = GroupPermissions.NONE
-        val cookie : Cookie? = if (!cookieSet.isEmpty()) cookieSet.filter { it.name() == "z-sID" }.getOrNull(0) else null
-        if (cookie != null) {
-            val session = sessionM.getSessionsByID(cookie.value())
-            if (session != null) {
-                logged = session.group
-            }
-        }
-
-        if (anno.permission != GroupPermissions.NONE && clazz.simpleName != "404Page") {
-            val perm = anno.permission
-            if (logged.ordinal < perm.ordinal) {
-                val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER.retain())
+        val usersGroup : Group? = newFullHttpReq.group
+        if (((usersGroup == null && anno.needToLogged) || (usersGroup != null && !anno.groupNeededRights.all { usersGroup.hasPermission(it) })) && clazz.simpleName != "404Page") {
+            if (req.method() == HttpMethod.GET) {
+                val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER.retain())
                 res.headers().set(HttpHeaderNames.LOCATION, "/?needLogin")
+                ctx.writeAndFlush(res).addListener { ctx.close();res.content().release(); }
+                return
+            } else {
+                val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.copiedBuffer("Du musst dich erst einloggen!".toByteArray(Charsets.UTF_8)).retain())
                 ctx.writeAndFlush(res).addListener { ctx.close();res.content().release(); }
                 return
             }
         }
-        val args : Map<String, String>? = splitArguments(path)
-        val value = clazz.getMethod("onRequest", WebServer::class.java, ChannelHandlerContext::class.java, FullHttpRequest::class.java, Set::class.java, GroupPermissions::class.java, Map::class.java).invoke(clazz.newInstance(), webServer, ctx, req, cookieSet, logged, args)
+        val value = clazz.getMethod("onRequest", ChannelHandlerContext::class.java, FullHttpReq::class.java).invoke(clazz.newInstance(), ctx, newFullHttpReq)
         val res : DefaultFullHttpResponse = value as DefaultFullHttpResponse
         res.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.HTML.mimeText)
         res.headers().set(HttpHeaderNames.CONTENT_LENGTH, res.content().array().size)
