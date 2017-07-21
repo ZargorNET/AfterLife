@@ -64,7 +64,7 @@ class HttpHandler(val webServer : WebServer, val packagePath : String) {
         if (clazz == null) {
             clazz = Class.forName(packagePath + ".404Page") as Class<in IWebRequest>
         }
-        val newFullHttpReq = FullHttpReq(req as DefaultFullHttpRequest, webServer)
+        val newFullHttpReq = FullHttpReq(req, webServer)
         val anno : WebRequest = clazz.getDeclaredAnnotation(WebRequest::class.java)
         val usersGroup : Group? = newFullHttpReq.group
         if (((usersGroup == null && anno.needToLogged) || (usersGroup != null && !anno.groupNeededRights.all { usersGroup.hasPermission(it) })) && clazz.simpleName != "404Page") {

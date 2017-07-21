@@ -25,16 +25,6 @@ class Login : IWebRequest {
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
             return res
         }
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN//TODO EINGELOGGT BLEIBEN EINFÜGEN//TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-        //TODO EINGELOGGT BLEIBEN EINFÜGEN
-
-
 
         if (req.method() == HttpMethod.POST) {
             val decoder = HttpPostRequestDecoder(req)

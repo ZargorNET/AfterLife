@@ -1,6 +1,7 @@
 package net.zargor.afterlife.web.objects
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest
+import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpHeaderNames
 import io.netty.handler.codec.http.cookie.Cookie
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder
@@ -11,7 +12,7 @@ import net.zargor.afterlife.web.WebServer
 /**
  * A better version from [io.netty.handler.codec.http.FullHttpRequest]
  */
-class FullHttpReq(val fullHttpRequest : DefaultFullHttpRequest, val main : WebServer) : DefaultFullHttpRequest(fullHttpRequest.protocolVersion(),fullHttpRequest.method(),fullHttpRequest.uri(),fullHttpRequest.content()) {
+class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer) : DefaultFullHttpRequest(fullHttpRequest.protocolVersion(),fullHttpRequest.method(),fullHttpRequest.uri(),fullHttpRequest.content()) {
     val cookies : Set<Cookie>
     val getParameters : Map<String,String>
     val postAttributes : List<Attribute>

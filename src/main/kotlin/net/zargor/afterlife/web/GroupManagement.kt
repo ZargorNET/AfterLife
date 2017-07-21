@@ -17,6 +17,8 @@ class GroupManagement(val main : WebServer) {
                 found.forEach { groups.add(main.gson.fromJson(it.toJson(), Group::class.java)) }
             }
         }
+        //TODO Defaultgruppe in die DB
+        groups.add(Group("default", mutableListOf()))
     }
 
     @Synchronized

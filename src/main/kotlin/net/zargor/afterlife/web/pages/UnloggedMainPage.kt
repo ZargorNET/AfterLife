@@ -20,7 +20,7 @@ class UnloggedMainPage : IWebRequest{
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
             return res
         }
-        val temp = JtwigTemplate.classpathTemplate("/src/main/resources/pages/login.html")
+        val temp = JtwigTemplate.classpathTemplate("/pages/login.html")
         val model = JtwigModel.newModel().with("mayRegister", true)
         val bytes = temp.render(model).toByteArray(Charsets.UTF_8)
 

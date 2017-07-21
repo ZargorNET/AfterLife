@@ -2,6 +2,7 @@ package net.zargor.afterlife.web
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandler
+import io.netty.handler.codec.http.DefaultFullHttpResponse
 import io.netty.handler.codec.http.FullHttpRequest
 
 /**
@@ -19,7 +20,11 @@ class HttpRequestHandler(val webServer : WebServer) : ChannelInboundHandler {
 
     override fun channelRead(ctx : ChannelHandlerContext?, msg : Any?) {
         if (msg is FullHttpRequest && ctx != null) {
-            webServer.handler.fireRequestHandling(ctx,msg)
+            try {
+                webServer.handler.fireRequestHandling(ctx, msg)
+            } catch (e : Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

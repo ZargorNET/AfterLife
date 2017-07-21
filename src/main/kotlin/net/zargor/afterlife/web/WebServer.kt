@@ -21,12 +21,12 @@ import net.zargor.afterlife.web.mongodb.MongoDB
  * Mainclass
  */
 class WebServer(address : String, port : Int) {
+    val config : Config = Config()
+    val mongoDB : MongoDB = MongoDB(config.prop)
     val handler = HttpHandler(this,this.javaClass.`package`.name + ".pages")
     val isEpollAvailable : Boolean = Epoll.isAvailable()
     val bootstrap : ServerBootstrap = ServerBootstrap()
     val channel : Channel
-    val config : Config = Config()
-    val mongoDB : MongoDB = MongoDB(config.prop)
     val gson : Gson = Gson()
 
     init {

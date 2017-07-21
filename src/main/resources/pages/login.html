@@ -5,8 +5,8 @@
     <title>AfterLife - Login</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="/src/main/resources/css/propeller.min.css" rel="stylesheet">
-    <link href="/src/main/resources/css/afterlife_login.min.css" rel="stylesheet">
+    <link href="/css/propeller.min.css" rel="stylesheet">
+    <link href="/css/afterlife_login.min.css" rel="stylesheet">
     <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <form class="login-form" method="post">
         <div class="pmd-card pmd-z-depth text-center">
             <div class="pmd-card-title text-center">
-                <img src="/src/main/resources/data/logo.jpg" alt="Logo" width="100" height="100">
+                <img src="/data/logo.jpg" alt="Logo" width="100" height="100">
                 <h3><span id="infoText">Melde dich an bei <strong>AfterLife</strong></span></h3>
             </div>
             <!--LOGIN-->
@@ -65,7 +65,7 @@
                     <label for="regName" class="control-label pmd-input-group-label">Username</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">perm_identity</i></div>
-                        <input type="text" class="form-control" name="name" id="regName" maxlength="24"
+                        <input class="form-control" name="name" id="regName" maxlength="24"
                                pattern="[A-Za-z0-9\-]+" title="A-Z 0-9 -" required formnovalidate>
                     </div>
                 </div>
