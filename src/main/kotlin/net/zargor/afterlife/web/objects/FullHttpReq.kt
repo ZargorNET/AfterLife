@@ -8,34 +8,41 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder
 import io.netty.handler.codec.http.multipart.Attribute
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import net.zargor.afterlife.web.WebServer
+import org.jtwig.JtwigModel
+import org.jtwig.JtwigTemplate
+import java.text.NumberFormat
+import java.util.*
 
 /**
  * A better version from [io.netty.handler.codec.http.FullHttpRequest]
  */
-class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer) : DefaultFullHttpRequest(fullHttpRequest.protocolVersion(),fullHttpRequest.method(),fullHttpRequest.uri(),fullHttpRequest.content()) {
+class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer, lang : String) : DefaultFullHttpRequest(fullHttpRequest.protocolVersion(), fullHttpRequest.method(), fullHttpRequest.uri(), fullHttpRequest.content()) {
     val cookies : Set<Cookie>
-    val getParameters : Map<String,String>
+    val getParameters : Map<String, String>
     val postAttributes : List<Attribute>
     val group : Group?
+    var language : String = lang
+
     init {
         //COOKIES
         val cookiesReq = fullHttpRequest.headers().get(HttpHeaderNames.COOKIE)
         cookies = if (cookiesReq != null) ServerCookieDecoder.STRICT.decode(cookiesReq) else setOf()
-
         //GET_PARAMETERS
         getParameters = splitGetArguments() ?: mapOf()
-
         //POST_ATTRIBUTES
         postAttributes = getPostAttri()
-
         //GROUP
         group = getUsersGroup()
+        //Language
+        if (getParameters.containsKey("lang")) {
+            language = getParameters["lang"]!!
+        }
     }
 
     //Using sessions
     private fun getUsersGroup() : Group? {
         val cookie : Cookie? = cookies.firstOrNull { it.name() == "z-sID" }
-        if(cookie != null) {
+        if (cookie != null) {
             val sID = main.handler.sessionM.getSessionsByID(cookie.value())
             return sID?.group
         }
@@ -48,7 +55,6 @@ class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer) :
         decoder.bodyHttpDatas.filter { it is Attribute }.forEach { attributes.add(it as Attribute) }
         return attributes.toList()
     }
-
 
     private fun splitGetArguments() : Map<String, String>? {
         if (uri().contains('?')) {
@@ -85,5 +91,20 @@ class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer) :
         return null
     }
 
+    fun renderHtml(fileName : String, extraAttributes : MutableMap<String, String> = mutableMapOf()) : ByteArray {
+        val temp = JtwigTemplate.classpathTemplate("/pages/$fileName/$fileName.html")
+        val model = JtwigModel.newModel()
+        val resourceBundle = ResourceBundle.getBundle("pages/$fileName/$fileName", Locale(language), object : ResourceBundle.Control() {
+            override fun getFallbackLocale(baseName : String?, locale : Locale?) : Locale {
+                return Locale("en")
+            }
+        })
+        resourceBundle.keySet().forEach { extraAttributes.put(it, resourceBundle.getString(it)) }
+        extraAttributes.forEach { k, v -> model.with(k, v) }
+        return temp.render(model).toByteArray(Charsets.UTF_8)
+    }
+}
 
+fun main(args : Array<String>) {
+    println(NumberFormat.getInstance().format(6000000))
 }

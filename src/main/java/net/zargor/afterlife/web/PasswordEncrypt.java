@@ -1,6 +1,6 @@
 package net.zargor.afterlife.web;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

@@ -9,8 +9,6 @@ import io.netty.handler.codec.http.HttpVersion
 import net.zargor.afterlife.web.IWebRequest
 import net.zargor.afterlife.web.WebRequest
 import net.zargor.afterlife.web.objects.FullHttpReq
-import org.jtwig.JtwigModel
-import org.jtwig.JtwigTemplate
 
 @WebRequest("/", false, emptyArray())
 class UnloggedMainPage : IWebRequest{
@@ -20,9 +18,7 @@ class UnloggedMainPage : IWebRequest{
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard")
             return res
         }
-        val temp = JtwigTemplate.classpathTemplate("/pages/login.html")
-        val model = JtwigModel.newModel().with("mayRegister", true)
-        val bytes = temp.render(model).toByteArray(Charsets.UTF_8)
+        val bytes = req.renderHtml("login", mutableMapOf(Pair("grecaptcha_publickey", "${req.main.config.config["grecaptcha_public_key"] ?: "invalid_config"}")))
 
         return DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(bytes).retain())
     }

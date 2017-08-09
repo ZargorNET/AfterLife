@@ -5,12 +5,15 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder
 import net.zargor.afterlife.web.objects.FullHttpReq
 import net.zargor.afterlife.web.objects.Group
 import org.apache.commons.io.IOUtils
+import org.apache.commons.lang3.time.DateUtils
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.InetSocketAddress
+import java.util.*
 
 /**
  * Created by Zargor on 07.07.2017.
@@ -64,7 +67,8 @@ class HttpHandler(val webServer : WebServer, val packagePath : String) {
         if (clazz == null) {
             clazz = Class.forName(packagePath + ".404Page") as Class<in IWebRequest>
         }
-        val newFullHttpReq = FullHttpReq(req, webServer)
+        val lang = getLanguage(req)
+        val newFullHttpReq = FullHttpReq(req, webServer, lang)
         val anno : WebRequest = clazz.getDeclaredAnnotation(WebRequest::class.java)
         val usersGroup : Group? = newFullHttpReq.group
         if (((usersGroup == null && anno.needToLogged) || (usersGroup != null && !anno.groupNeededRights.all { usersGroup.hasPermission(it) })) && clazz.simpleName != "404Page") {
@@ -81,6 +85,8 @@ class HttpHandler(val webServer : WebServer, val packagePath : String) {
         }
         val value = clazz.getMethod("onRequest", ChannelHandlerContext::class.java, FullHttpReq::class.java).invoke(clazz.newInstance(), ctx, newFullHttpReq)
         val res : DefaultFullHttpResponse = value as DefaultFullHttpResponse
+        if (lang != newFullHttpReq.language)
+            res.headers().add(HttpHeaderNames.SET_COOKIE, "lang=${newFullHttpReq.language}; Expires=${DateUtils.addYears(Date(), 1).toGMTString()}")
         res.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.HTML.mimeText)
         res.headers().set(HttpHeaderNames.CONTENT_LENGTH, res.content().array().size)
         res.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store, must-revalidate")
@@ -169,5 +175,17 @@ class HttpHandler(val webServer : WebServer, val packagePath : String) {
         IOUtils.closeQuietly(input)
         IOUtils.closeQuietly(output)
         return output.toByteArray()
+    }
+
+    /**
+     * @return Language from cookie else "en"
+     */
+    private fun getLanguage(req : FullHttpRequest) : String {
+        val langFrom : String = req.headers()[HttpHeaderNames.ACCEPT_LANGUAGE]?.substring(0, 2) ?: "en"
+        if (req.headers()[HttpHeaderNames.COOKIE] == null) {
+            return langFrom
+        } else {
+            return (ServerCookieDecoder.STRICT.decode(req.headers()[HttpHeaderNames.COOKIE]).firstOrNull { it.name() == "lang" })?.value() ?: langFrom
+        }
     }
 }
