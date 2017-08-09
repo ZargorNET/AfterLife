@@ -3,8 +3,6 @@ package net.zargor.afterlife.web.pages
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
-import io.netty.handler.codec.http.multipart.Attribute
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 import net.zargor.afterlife.web.IWebRequest
 import net.zargor.afterlife.web.PasswordEncrypt
 import net.zargor.afterlife.web.WebRequest
@@ -27,29 +25,34 @@ class Login : IWebRequest {
         }
 
         if (req.method() == HttpMethod.POST) {
-            val decoder = HttpPostRequestDecoder(req)
-            if (decoder.getBodyHttpData("name") != null && decoder.getBodyHttpData("password") != null) {
-                val name = (decoder.getBodyHttpData("name") as Attribute).value
-                val password = (decoder.getBodyHttpData("password") as Attribute).value
+            val resourceBundle = req.getClassResourceBundle("LoginClass")
+
+            if (req.postAttributes.any { it.name == "name" } && req.postAttributes.any { it.name == "password" }) {
+                val name = req.postAttributes.find { it.name == "name" }!!.value
+                val password = req.postAttributes.find { it.name == "password" }!!.value
 
                 if(name.isEmpty() || password.isEmpty()){
-                   return  DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Textboxen sind nicht vollständig ausfefüllt!".toByteArray(Charsets.UTF_8)).retain())
+                    return DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("incomplete_textboxes").toByteArray(Charsets.UTF_8)).retain())
                 }
-                if(!(name.matches(Regex("[A-Za-z0-9\\-]+")) && password.matches(Regex("[A-Za-z0-9\\-_#]+")))){
-                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Textboxen enthalten ungültige Zeichen".toByteArray(Charsets.UTF_8)).retain())
+                if (!name.matches(Regex("[A-Za-z0-9\\-]+"))) {
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(resourceBundle.getString("invalid_chars_username"), "A-Z a-z 0-9 -").toByteArray(Charsets.UTF_8)).retain())
+                    return res
+                }
+                if (!password.matches(Regex("[A-Za-z0-9\\-_#]+"))) {
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(resourceBundle.getString("invalid_chars_password"), "A-Z a-z 0-9 - _ #").toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
                 if(name.length > 24 || password.length > 24){
-                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Zu viele Zeichen in einer Textbox!".toByteArray(Charsets.UTF_8)).retain())
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("too_many_chars").toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
                 val player = req.main.mongoDB.playerColl?.find(Document("name", name.toLowerCase()))?.first()
                 if (player == null) {
-                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("User nicht gefunden".toByteArray(Charsets.UTF_8)).retain())
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("unknown_user").toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
                 if (player["password"] != PasswordEncrypt().encryptPassword(password)) {
-                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Falsches Passwort".toByteArray(Charsets.UTF_8)).retain())
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("bad_password").toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
                 if (player["group"] == null) {
@@ -57,7 +60,7 @@ class Login : IWebRequest {
                     return res
                 }
                 if(player["banned"] != null){
-                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer("Du wurdest gesperrt! Grund: ${player["banned"].toString()}. Du fühlst Dich ungerecht behandelt? Dann schreibe eine Email an: info@zargor.net . Bitte nutze dieselbe Email, mit der Du Dich angemeldet hast & den Betreff: AG.LAN Entsperrung".toByteArray(Charsets.UTF_8)).retain())
+                    val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer(String.format(resourceBundle.getString("banned"), player["banned"].toString()).toByteArray(Charsets.UTF_8)).retain())
                     return res
                 }
                 val res = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER.retain())

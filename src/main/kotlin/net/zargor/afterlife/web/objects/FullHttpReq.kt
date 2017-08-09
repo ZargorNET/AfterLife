@@ -91,6 +91,14 @@ class FullHttpReq(val fullHttpRequest : FullHttpRequest, val main : WebServer, l
         return null
     }
 
+    fun getClassResourceBundle(fileName : String) : ResourceBundle {
+        return ResourceBundle.getBundle("backend/pages/${fileName.toLowerCase()}/$fileName", Locale(language), object : ResourceBundle.Control() {
+            override fun getFallbackLocale(baseName : String?, locale : Locale?) : Locale {
+                return Locale("en")
+            }
+        })
+    }
+
     fun renderHtml(fileName : String, extraAttributes : MutableMap<String, String> = mutableMapOf()) : ByteArray {
         val temp = JtwigTemplate.classpathTemplate("/pages/$fileName/$fileName.html")
         val model = JtwigModel.newModel()

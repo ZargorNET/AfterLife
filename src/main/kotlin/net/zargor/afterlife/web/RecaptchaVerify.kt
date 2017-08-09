@@ -13,7 +13,7 @@ import java.util.*
  * Checks if the Recaptcha is valid
  */
 class RecaptchaVerify(webServer : WebServer){
-    private val secret : String = webServer.config.config["grecaptcha-key"] as String
+    private val secret : String = webServer.config.config["grecaptcha_private_key"] as String
     fun verifyRecaptcha(recpatcha_response : String) : Boolean {
         val request = HttpPost("https://www.google.com/recaptcha/api/siteverify")
         val params = ArrayList<NameValuePair>()
