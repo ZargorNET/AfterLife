@@ -1,9 +1,9 @@
-package net.zargor.afterlife.web.objects
+package net.zargor.afterlife.web;
 
 /**
  * Created by Zargor on 07.07.2017.
  */
-enum class GroupPermissions {
+public enum GroupPermissions {
     //Non extra rights
     NONE,
     //Username, Password, informations
