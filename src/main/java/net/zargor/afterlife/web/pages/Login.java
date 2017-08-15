@@ -50,7 +50,7 @@ public class Login implements IWebRequest {
                 if (!password.matches("[A-Za-z0-9\\-_#]+")) {
                     return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(resourceBundle.getString("invalid_chars_password"), "A-Z a-z 0-9 - _ #").getBytes(Charset.forName("UTF-8"))).retain());
                 }
-                if (name.length() > 24 || password.length() > 24) {
+                if (name.length() > 24 || password.length() > 100) {
                     return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("too_many_chars").getBytes(Charset.forName("UTF-8"))).retain());
                 }
                 Document player = WebServer.getInstance().getMongoDB().getPlayerColl().find(new Document("name", name.toLowerCase())).first();

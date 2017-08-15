@@ -12,6 +12,8 @@
 # Website: https://zargor.net
 #
 
+#The url where the website can be reached
+siteurl: "https://afterlife.mydomain.net"
 
 # MongoDB configuration:
 mongodb_username: "afterlife"
@@ -37,6 +39,17 @@ password_method: BCrypt
 grecaptcha_public_key: "your_key"
 grecaptcha_private_key: "your_secure_key"
 
+# Mailsetup
+smtp_host: "127.0.0.1"
+smtp_port: 587
+# Using STARTTLS
+smtp_secure: true
+smtp_authentication_required: true
+smtp_username: "noreply@mydomain.net"
+smtp_password: "your_password"
+# For example: "Afterlife LANPARTY"
+mail_from: "noreply@mydomain.net"
+mail_name: "AfterLife LAN Party Software"
 
 # Do not change!
 cfg_version: 1

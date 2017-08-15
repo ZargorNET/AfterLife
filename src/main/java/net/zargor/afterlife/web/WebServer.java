@@ -15,6 +15,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.Getter;
+import net.zargor.afterlife.web.mail.MailManagement;
 import net.zargor.afterlife.web.mongodb.MongoDB;
 
 /**
@@ -33,6 +34,8 @@ public class WebServer {
     @Getter
     private HttpHandler handler;
     @Getter
+    private MailManagement mail;
+    @Getter
     private boolean epollAvailable;
     @Getter
     private ServerBootstrap bootstrap;
@@ -46,6 +49,7 @@ public class WebServer {
         config = new Config();
         mongoDB = new MongoDB();
         handler = new HttpHandler(this.getClass().getPackage().getName() + ".pages");
+        mail = new MailManagement();
         epollAvailable = Epoll.isAvailable();
         bootstrap = new ServerBootstrap();
 
