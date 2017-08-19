@@ -32,8 +32,8 @@ webserver_host: 127.0.0.1
 # Passwords
 # Warning! Don't lose this salt! If you're losing it, users can't login anymore.
 password_salt: RANDOM_SALT
-# Valid types: BCrypt (recommended),SHA-512, SHA-256
-password_method: BCrypt
+# Valid types: PBKDF2 (recommended, slow, strong security), SHA-512(fast, medium security), SHA-256(fastest, weak security)
+password_method: PBKDF2
 
 # Googles Recaptcha
 grecaptcha_public_key: "your_key"

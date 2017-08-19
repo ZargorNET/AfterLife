@@ -18,6 +18,8 @@ public class UnloggedMainPage extends PageRequest {
         super("/");
     }
 
+    private String publickey = WebServer.getInstance().getConfig().getValue("grecaptcha_public_key").toString();
+
     @Override
     public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req) throws Exception {
         if (req.getGroup() != null) {
@@ -25,7 +27,6 @@ public class UnloggedMainPage extends PageRequest {
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard");
             return res;
         }
-        String publickey = WebServer.getInstance().getConfig().getValue("grecaptcha_public_key").toString();
         byte[] bytes = req.renderHtml("login", Optional.of(new HashMap<String, String>() {{
             put("grecaptcha_publickey", publickey != null ? publickey : "invalid_config");
         }}));

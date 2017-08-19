@@ -29,10 +29,9 @@ public abstract class PageRequest extends WebRequest {
         DefaultFullHttpResponse res;
         if (usersRights == null) {
             res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.copiedBuffer("You need to be logged in!".getBytes(Charset.forName("UTF-8"))).retain());
-            res.headers().set(HttpHeaderNames.LOCATION, "/");
+            res.headers().set(HttpHeaderNames.LOCATION, "/?needLogin");
         } else {
-            res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.copiedBuffer("Not enough permissions!".getBytes(Charset.forName("UTf-8"))).retain());
-            res.headers().set(HttpHeaderNames.LOCATION, "/");
+            res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer("Not enough permissions!".getBytes(Charset.forName("UTf-8"))).retain());
         }
         return res;
     }

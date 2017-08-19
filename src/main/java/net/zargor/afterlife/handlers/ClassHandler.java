@@ -33,21 +33,21 @@ abstract class ClassHandler<T extends WebRequest> {
                 .forEach((ThrowableConsumer<? super T>) t -> addClass(t, tClass));
     }
 
-    public void addClass(T t, Class<T> tClass) throws IllegalAccessException, InstantiationException {
+    public synchronized void addClass(T t, Class<T> tClass) throws IllegalAccessException, InstantiationException {
         if (list.stream().noneMatch(t1 -> t1.getClass().getName().equals(tClass.getName())))
             list.add(t);
     }
 
     public void removeAllClasses(String packagePath) {
-        list.removeAll(list.stream().filter(t -> t.getClass().getPackage().getName().equalsIgnoreCase(packagePath)).collect(Collectors.toList()));
+        list.stream().filter(t -> t.getClass().getPackage().getName().equalsIgnoreCase(packagePath)).forEach((ThrowableConsumer<? super T>) this::removeClass);
     }
 
-    public void removeClass(T t) throws IllegalAccessException, InstantiationException {
+    public synchronized void removeClass(T t) throws IllegalAccessException, InstantiationException {
 
         list.removeAll(list.stream().filter(t1 -> t1.getClass().getName().equals(t.getClass().getName())).collect(Collectors.toList()));
     }
 
-    public List<T> getList() {
+    public synchronized List<T> getList() {
         return list;
     }
 

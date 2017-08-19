@@ -67,7 +67,7 @@ public class SessionManagement {
     }
 
     private String generateSessionID() {
-        String s = UUID.randomUUID().toString().replace("-", "");
+        String s = (UUID.randomUUID().toString() + UUID.randomUUID().toString()).replace("-", "");
         if (sessions.stream().anyMatch(session -> session.getId().equals(s)))
             return generateSessionID();
         return s;

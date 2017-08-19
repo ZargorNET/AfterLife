@@ -57,7 +57,7 @@ public class ModuleRequestHandler extends ClassHandler<Module> {
         if (module == null)
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, Unpooled.copiedBuffer("Module wasn't found!".getBytes(Charset.forName("UTF-8"))));
         if (module.isDisabled())
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.LOCKED, Unpooled.copiedBuffer("Modules is deactivated!".getBytes(Charset.forName("UTF-8"))).retain());
+            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.LOCKED, Unpooled.copiedBuffer("Module is deactivated!".getBytes(Charset.forName("UTF-8"))).retain());
         try {
             GroupPermissions[] neededRights = permissionFailure(module, req);
             if (neededRights != null) {

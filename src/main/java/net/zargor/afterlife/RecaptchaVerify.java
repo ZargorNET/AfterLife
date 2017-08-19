@@ -21,15 +21,13 @@ import java.util.*;
  */
 public class RecaptchaVerify {
 
-    private String secret = WebServer.getInstance().getConfig().getValue("grecaptcha_private_key").toString();
-
-    public boolean verifyRecaptcha(String recaptcha_response) {
-        if (recaptcha_response == null)
+    public static boolean verifyRecaptcha(String recaptcha_response) {
+        if (recaptcha_response == null || Objects.equals(recaptcha_response, ""))
             return false;
         try {
             HttpPost request = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
             List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("secret", secret));
+            params.add(new BasicNameValuePair("secret", WebServer.getInstance().getConfig().getValue("grecaptcha_private_key").toString()));
             params.add(new BasicNameValuePair("response", recaptcha_response));
             request.setEntity(new UrlEncodedFormEntity(params));
             HttpClient httpClient = HttpClients.createDefault();

@@ -11,10 +11,12 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import net.zargor.afterlife.MimeTypes;
 import net.zargor.afterlife.objects.FullHttpReq;
 import net.zargor.afterlife.requests.Module;
 import net.zargor.afterlife.requests.PageRequest;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.*;
 import java.net.*;
@@ -29,7 +31,9 @@ public class NettyHttpRequestHandler implements ChannelInboundHandler {
 
     private TooManyRequestHandler tooManyRequestHandler = new TooManyRequestHandler();
 
+    @Getter
     private ModuleRequestHandler moduleHandler;
+    @Getter
     private PageRequestHandler pageRequestHandler;
 
     public NettyHttpRequestHandler() {
@@ -66,7 +70,9 @@ public class NettyHttpRequestHandler implements ChannelInboundHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FullHttpRequest && ctx != null) {
-            FullHttpRequest req = (FullHttpRequest) msg;
+            FullHttpRequest nettyReq = (FullHttpRequest) msg;
+            String orginalLanguage = RequestUtils.getLanguage(nettyReq);
+            FullHttpReq req = new FullHttpReq(nettyReq, orginalLanguage);
             String path = req.uri().contains("?") ? req.uri().split("\\?")[0] : req.uri();
 
             System.out.println(String.format("Neue Verbindung von %s", ((InetSocketAddress) ctx.channel().remoteAddress()).getHostString()));
@@ -112,12 +118,12 @@ public class NettyHttpRequestHandler implements ChannelInboundHandler {
                 //Modules
                 TooManyRequestHandler.ConnectionRequestAmount cra = tooManyRequestHandler.tooManyRequests(ctx, HttpMethod.POST);
                 if (cra != null) {
-                    res = moduleHandler.onTooManyRequests(ctx, new FullHttpReq(req, RequestUtils.getLanguage(req)), cra);
+                    res = moduleHandler.onTooManyRequests(ctx, req, cra);
                 } else {
-                    res = moduleHandler.onRequest(ctx, new FullHttpReq(req, RequestUtils.getLanguage(req)));
+                    res = moduleHandler.onRequest(ctx, req);
                 }
                 if (res == null)
-                    throw new NullPointerException("Modules classhandler response is null");
+                    throw new NullPointerException(String.format("Response from the Module(%s) classhandler must not be null", req.uri().substring(1)));
                 res.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.PLAIN.getMimeText());
                 res.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store, must-revalidate");
             } else {
@@ -128,7 +134,8 @@ public class NettyHttpRequestHandler implements ChannelInboundHandler {
             if (res.refCnt() == 0)
                 res.retain();
             res.headers().set(HttpHeaderNames.CONTENT_LENGTH, res.content().array().length);
-
+            if (!req.getLanguage().equals(orginalLanguage))
+                res.headers().add(HttpHeaderNames.SET_COOKIE, String.format("lang=%s; Expires=%s", req.getLanguage(), DateUtils.addYears(new Date(), 1).toGMTString()));
             ctx.writeAndFlush(res)
                     .addListener(future -> {
                         ctx.close();
@@ -174,16 +181,16 @@ public class NettyHttpRequestHandler implements ChannelInboundHandler {
         cause.printStackTrace();
     }
 
-    private DefaultFullHttpResponse firePageRequestClassHandler(ChannelHandlerContext ctx, FullHttpRequest req) {
+    private DefaultFullHttpResponse firePageRequestClassHandler(ChannelHandlerContext ctx, FullHttpReq req) {
         DefaultFullHttpResponse res;
         TooManyRequestHandler.ConnectionRequestAmount cra = tooManyRequestHandler.tooManyRequests(ctx, HttpMethod.GET);
         if (cra != null) {
-            res = pageRequestHandler.onTooManyRequests(ctx, new FullHttpReq(req, RequestUtils.getLanguage(req)), cra);
+            res = pageRequestHandler.onTooManyRequests(ctx, req, cra);
         } else {
-            res = pageRequestHandler.onRequest(ctx, new FullHttpReq(req, RequestUtils.getLanguage(req)));
+            res = pageRequestHandler.onRequest(ctx, req);
         }
         if (res == null)
-            throw new NullPointerException("Modules classhandler response is null");
+            throw new NullPointerException(String.format("Response from the PageRequest(%s) classhandler must not be null", req.uri()));
         res.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.HTML.getMimeText());
         res.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store, must-revalidate");
         return res;

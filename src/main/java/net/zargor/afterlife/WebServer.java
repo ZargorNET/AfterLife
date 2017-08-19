@@ -18,38 +18,31 @@ import lombok.Getter;
 import net.zargor.afterlife.handlers.NettyHttpRequestHandler;
 import net.zargor.afterlife.mail.MailManagement;
 import net.zargor.afterlife.mongodb.MongoDB;
+import net.zargor.afterlife.passwords.PasswordEncrypt;
 import net.zargor.afterlife.permissionssystem.GroupManagement;
 import net.zargor.afterlife.permissionssystem.SessionManagement;
 
 /**
  * Mainclass
  */
-
+@Getter
 public class WebServer {
 
     @Getter
     private static WebServer instance;
 
-    @Getter
     private Config config;
-    @Getter
     private MongoDB mongoDB;
-    @Getter
     private NettyHttpRequestHandler handler;
-    @Getter
     private GroupManagement groupManagement;
-    @Getter
     private SessionManagement sessionManagement;
-    @Getter
     private MailManagement mail;
-    @Getter
-    private boolean epollAvailable;
-    @Getter
     private ServerBootstrap bootstrap;
+    private Gson gson;
+    private PasswordEncrypt passwordEncrypt;
 
     private Channel channel;
-    @Getter
-    private Gson gson = new Gson();
+    private boolean epollAvailable;
 
     public WebServer() {
         instance = this;
@@ -61,7 +54,8 @@ public class WebServer {
         mail = new MailManagement();
         epollAvailable = Epoll.isAvailable();
         bootstrap = new ServerBootstrap();
-
+        gson = new Gson();
+        passwordEncrypt = new PasswordEncrypt();
 
         EventLoopGroup masterGroup = epollAvailable ? new EpollEventLoopGroup() : new NioEventLoopGroup();
         EventLoopGroup workerGroup = epollAvailable ? new EpollEventLoopGroup() : new NioEventLoopGroup();
