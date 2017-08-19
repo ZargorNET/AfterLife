@@ -219,6 +219,17 @@
             pwCodeReset.show();
             infoText.html("{{ set_new_password_here }}")
         }
+        if (url("?registerComplete") !== undefined) {
+            alertBtn.attr('data-message', "{{ registerComplete }}");
+            alertBtn.attr('data-type', "success");
+            alertBtn.trigger("click")
+        }
+        if (url("?invalidRegisterCode") !== undefined) {
+            alertBtn.attr('data-message', "{{ invalidRegisterCode }}");
+            alertBtn.attr('data-type', "error");
+            alertBtn.trigger("click")
+        }
+
     });
 
     function loginButtonClick() {
@@ -265,13 +276,10 @@
                 "recaptcha": grecaptcha.getResponse(regCaptcha),
                 password: $("#regPassword").val()
             },
-            success: function () {
-                alertBtn.attr('data-message', "{{ success }}");
+            success: function (data) {
+                alertBtn.attr('data-message', data);
                 alertBtn.attr('data-type', 'success');
                 alertBtn.trigger("click");
-                setTimeout(function () {
-                    window.location.href = "/dashboard"
-                }, 4000);
             },
             error: function (xhr) {
                 if (xhr.status === 0) {

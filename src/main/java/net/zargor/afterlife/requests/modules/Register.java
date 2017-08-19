@@ -3,17 +3,20 @@ package net.zargor.afterlife.requests.modules;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import net.zargor.afterlife.RecaptchaVerify;
 import net.zargor.afterlife.WebServer;
+import net.zargor.afterlife.mail.templates.RegisterConfirmationEmail;
 import net.zargor.afterlife.objects.FullHttpReq;
 import net.zargor.afterlife.requests.Module;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 
 import java.nio.charset.Charset;
 import java.util.*;
+import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
 
 /**
  * Created by Zargor on 11.07.2017.
@@ -66,15 +69,19 @@ public class Register extends Module {
             if (!email.matches("[A-Za-z0-9_\\-.]+@{1}[A-Za-z0-9]+\\.{1}[A-Za-z]+")) {
                 return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("email_invalid_chars").getBytes(Charset.forName("UTF-8"))).retain());
             }
-            if (!new RecaptchaVerify().verifyRecaptcha(recaptcha)) {
+            if (!RecaptchaVerify.verifyRecaptcha(recaptcha)) {
                 return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(resourceBundle.getString("invalid_captcha").getBytes(Charset.forName("UTF-8"))).retain());
             }
-            WebServer.getInstance().getMongoDB().getPlayerColl().insertOne(new Document("name", name).append("password", WebServer.getInstance().getPasswordEncrypt().getAlgorithm().hashPassword(password)).append("email", email).append("group", "default"));
-            DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER.retain());
-            res.headers().add(HttpHeaderNames.SET_COOKIE, WebServer.getInstance().getSessionManagement().createCookieString(name, "default", secure));
-            res.headers().set(HttpHeaderNames.LOCATION, "/dashboard");
-            return res;
+            String code = generateCode();
+            WebServer.getInstance().getMongoDB().getPlayerColl().insertOne(new Document("name", name).append("password", WebServer.getInstance().getPasswordEncrypt().getAlgorithm().hashPassword(password)).append("email", email).append("group", "default").append("registerConfirmationCode", code));
+            RegisterConfirmationEmail mail = new RegisterConfirmationEmail(req.getLanguage(), name, code, WebServer.getInstance().getConfig().getValue("siteurl"), "Register confirmation", new Address[]{new InternetAddress(email)}, null, null);
+            WebServer.getInstance().getMail().sendMail(mail);
+            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(resourceBundle.getString("success_send_confirmation").getBytes("UTF-8")));
         }
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Invalid parameters!".getBytes(Charset.forName("UTF-8"))).retain());
+    }
+
+    private String generateCode() {
+        return RandomStringUtils.random(16, "0123456789AaBbCcZz") + "_" + System.currentTimeMillis();
     }
 }

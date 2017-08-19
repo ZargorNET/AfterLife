@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.multipart.Attribute;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import net.zargor.afterlife.RecaptchaVerify;
 import net.zargor.afterlife.WebServer;
 import net.zargor.afterlife.exceptionhandlers.ThrowableFunction;
@@ -28,6 +29,7 @@ import javax.mail.internet.InternetAddress;
 
 public class Passwordreset extends Module {
 
+    public static final int RESET_TIME = 45;
     private final List<PasswordresetCode> codes;
 
     public Passwordreset() {
@@ -39,16 +41,11 @@ public class Passwordreset extends Module {
                 synchronized (codes) {
                     Date d = new Date();
                     codes.removeAll(codes.stream().filter(passwordresetCode -> passwordresetCode.expireTime < d.getTime())
-                            .filter(passwordresetCode -> passwordresetCode.getExpireTime() >= DateUtils.addMinutes(new Date(passwordresetCode.getExpireTime()), 45).getTime())
+                            .filter(passwordresetCode -> DateUtils.addMinutes(new Date(passwordresetCode.getExpireTime()), RESET_TIME).getTime() <= d.getTime())
                             .collect(Collectors.toList()));
                 }
-                try {
-                    Thread.sleep(1000 * 60);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
-        }, "Passwordreset code cleaner");
+        }, "Passwordreset code cleaner").start();
     }
 
     @Override
@@ -82,7 +79,7 @@ public class Passwordreset extends Module {
     private DefaultFullHttpResponse sendCode(ChannelHandlerContext ctx, FullHttpReq req, ResourceBundle bundle, Document doc) throws Exception {
         PasswordresetCode pc = getCodes().stream().filter(pc1 -> pc1.username.equalsIgnoreCase(doc.getString("name"))).findFirst().orElse(null);
         if (pc != null) {
-            int remainingTime = new Date(DateUtils.addMinutes(new Date(pc.getExpireTime()), 45).getTime() - new Date().getTime()).getMinutes();
+            int remainingTime = new Date(DateUtils.addMinutes(new Date(pc.getExpireTime()), RESET_TIME).getTime() - new Date().getTime()).getMinutes();
             if (remainingTime == 0)
                 remainingTime = 1;
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("too_fast_request"), remainingTime).getBytes("UTF-8")));
@@ -99,7 +96,7 @@ public class Passwordreset extends Module {
         PasswordresetCode passwordresetCode = getCodes().stream().filter(pc -> pc.code.equals(code)).findFirst().orElse(null);
         if (password == null)
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Bad request! Did you modify the post parameters?".getBytes("UTF-8")));
-        if (passwordresetCode == null || passwordresetCode.getExpireTime() < new Date().getTime())
+        if (passwordresetCode == null || passwordresetCode.getExpireTime() < new Date().getTime() || !passwordresetCode.isValid())
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("code_invalid").getBytes("UTF-8")));
         if (password.length() < 8)
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("password_too_short"), 8).getBytes("UTF-8")));
@@ -108,6 +105,7 @@ public class Passwordreset extends Module {
         if (!password.matches("[A-Za-z0-9\\-#]+"))
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("password_invalid_chars").getBytes("UTF-8")));
         WebServer.getInstance().getMongoDB().getPlayerColl().updateOne(Filters.eq("name", passwordresetCode.username), Updates.set("password", WebServer.getInstance().getPasswordEncrypt().getAlgorithm().hashPassword(password)));
+        passwordresetCode.setValid(false);
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
     }
 
@@ -122,6 +120,8 @@ public class Passwordreset extends Module {
         private final String username;
         private final String code;
         private long expireTime;
+        @Setter
+        private boolean valid = true;
 
         public PasswordresetCode(String username, String code) {
             this.username = username;

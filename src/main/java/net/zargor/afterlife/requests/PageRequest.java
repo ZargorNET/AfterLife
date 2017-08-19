@@ -20,8 +20,9 @@ public abstract class PageRequest extends WebRequest {
 
     @NonNull
     private final String route;
+    private String belongsToModuleName;
 
-    public abstract DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req) throws Exception;
+    public abstract DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception;
 
     @Override
     public DefaultFullHttpResponse onPermissionFailure(GroupPermissions[] neededRights, GroupPermissions[] usersRights) throws Exception {

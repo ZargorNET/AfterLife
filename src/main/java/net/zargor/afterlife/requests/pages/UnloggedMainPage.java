@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import net.zargor.afterlife.WebServer;
 import net.zargor.afterlife.objects.FullHttpReq;
+import net.zargor.afterlife.requests.Module;
 import net.zargor.afterlife.requests.PageRequest;
 
 import java.util.*;
@@ -15,13 +16,13 @@ import java.util.*;
 public class UnloggedMainPage extends PageRequest {
 
     public UnloggedMainPage() {
-        super("/");
+        super("/", null);
     }
 
     private String publickey = WebServer.getInstance().getConfig().getValue("grecaptcha_public_key").toString();
 
     @Override
-    public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req) throws Exception {
+    public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
         if (req.getGroup() != null) {
             DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY);
             res.headers().set(HttpHeaderNames.LOCATION, "/dashboard");

@@ -68,34 +68,31 @@ public class FullHttpReq extends DefaultFullHttpRequest {
 
     private Map<String, String> splitGetArguments() {
         if (uri().contains("?")) {
-            Map<String, String> map = new HashMap<>();
-            String[] splitA = uri().split("\\?");
-            final String[] splitT = {splitA[1]};
-            if (splitA.length > 2) {
-                final int[] index = {0};
-                Arrays.stream(splitA).forEach(s -> {
-                    if (index[0] > 1) {
-                        splitT[0] += "?" + s;
-                    }
-                    index[0]++;
-                });
+            if (uri().substring(1).chars().allMatch(i -> (char) i == '?')) {
+                return null;
             }
-            List<String> args = new ArrayList<>();
-            if (splitT[0].contains("&")) {
-                args.addAll(Arrays.asList(splitT[0].split("&")));
-            } else {
-                args.add(splitT[0]);
-            }
-            args.forEach(s -> {
-                if (!s.equals(""))
+            if (uri().charAt(1) == '?') {
+                String newUri = uri().substring(1);
+
+                List<String> vars = new ArrayList<>();
+                String[] keys = newUri.split("&");
+                vars.addAll(Arrays.asList(keys));
+                Map<String, String> map = new HashMap<>();
+                vars.forEach(s -> {
+                    if (s.startsWith("?"))
+                        s = s.substring(1);
                     if (s.contains("=")) {
-                        String[] vs = s.split("=");
-                        map.put(vs[0], vs[1]);
+                        String[] keyValue = s.split("=");
+                        if (keyValue.length == 2) {
+                            map.put(keyValue[0], keyValue[1]);
+                        }
                     } else {
                         map.put(s, "true");
                     }
-            });
-            return map;
+                });
+                map.forEach((s, s2) -> System.out.println(s + " : " + s2));
+                return map;
+            }
         }
         return null;
     }

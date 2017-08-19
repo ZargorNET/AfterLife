@@ -1,21 +1,19 @@
 <div id="main">
     <div id="head">
-        <h1>Password reset</h1>
+        <h1>Registrierungsbestätigung</h1>
     </div>
     <div id="body">
-        <p>Hello ${name}!<br/>
-            Apparently you tried to reset your password! <br/>
-            If thats not the case, you can ignore this email.
+        <p>Hallo ${name}!<br/>
+            Du hast anscheinend dich bei ${siteurl} registriert! <br/>
+            Falls dies nicht der Fall ist, kannst du diese Mail einfach ignorieren.
         </p>
         <br/>
-        <p>To reset your password click here: <a href="${siteurl}/passwordreset?code={code}">${siteurl}/passwordreset?code=${code}</a>
+        <p>Um deine Registration zu bestätigen, einfach hier klicken: <a href="${siteurl}/register?code=${code}">${siteurl}/register?code=${code}</a>
         </p>
     </div>
     <div id="footer">
-        <section id="info">
-            <p>AfterLife your free LAN party software! <a href="https://github.com/ZargorNET/AfterLife" target="_blank">*click*</a>
-            </p>
-        </section>
+        <p>AfterLife deine freie Lanparty Software! <a href="https://github.com/ZargorNET/AfterLife" target="_blank">*klick*</a>
+        </p>
     </div>
 </div>
 
@@ -23,6 +21,7 @@
     a {
         transition: color 1s;
     }
+
     a:link {
         color: limegreen;
         text-decoration: none;
@@ -42,6 +41,7 @@
         color: limegreen;
         text-decoration: none;
     }
+
     #main {
         color: #32434a;
         width: 100%;

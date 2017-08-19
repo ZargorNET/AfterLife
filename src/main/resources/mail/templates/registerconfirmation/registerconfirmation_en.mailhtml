@@ -1,0 +1,67 @@
+<div id="main">
+    <div id="head">
+        <h1>Register confirmation</h1>
+    </div>
+    <div id="body">
+        <p>Hello ${name}!<br/>
+            Apparently you registered at ${siteurl]!<br/>
+            If thats not the case, you can ignore this email.
+        </p>
+        <br/>
+        <p>To confirm your registration click here: <a href="${siteurl}/register?code=${code}">${siteurl}/register?code=${code}</a>
+        </p>
+    </div>
+    <div id="footer">
+        <p>AfterLife deine freie Lanparty Software! <a href="https://github.com/ZargorNET/AfterLife" target="_blank">*klick*</a>
+        </p>
+    </div>
+
+    <style>
+        a {
+            transition: color 1s;
+        }
+
+        a:link {
+            color: limegreen;
+            text-decoration: none;
+        }
+
+        a:visited {
+            color: limegreen;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #056f00;
+            text-decoration: none;
+        }
+
+        a:active {
+            color: limegreen;
+            text-decoration: none;
+        }
+
+        #main {
+            color: #32434a;
+            width: 100%;
+            text-align: center;
+            background-color: #fafafa;
+            font-family: Arial, sans-serif;
+        }
+
+        #head {
+            padding: 10px 0;
+            color: white;
+            background-color: #4CAF50;
+        }
+
+        #body {
+            padding: 10px;
+        }
+
+        #footer {
+            padding: 10px;
+            background-color: #303030;
+            color: white;
+        }
+    </style>

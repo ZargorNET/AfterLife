@@ -5,8 +5,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import net.zargor.afterlife.WebServer;
 import net.zargor.afterlife.objects.FullHttpReq;
 import net.zargor.afterlife.permissionssystem.GroupPermissions;
+import net.zargor.afterlife.requests.Module;
 import net.zargor.afterlife.requests.PageRequest;
 
 import java.nio.charset.Charset;
@@ -29,14 +31,21 @@ public class PageRequestHandler extends ClassHandler<PageRequest> {
         if (pageRequest == null)
             //TODO
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, Unpooled.copiedBuffer("Page wasn't found!".getBytes(Charset.forName("UTF-8"))));
-
+        Module module = null;
+        if (pageRequest.getBelongsToModuleName() != null) {
+            module = WebServer.getInstance().getHandler().getModuleHandler().getList().stream().filter(module1 -> module1.getName().equalsIgnoreCase(pageRequest.getBelongsToModuleName())).findFirst().orElse(null);
+            if (module == null)
+                throw new NullPointerException(String.format("Module that belongs to the PageRequest(%s) doesnt exist!", pageRequest.getRoute()));
+            if (module.isDisabled())
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.LOCKED, Unpooled.copiedBuffer("Module is deactivated!".getBytes()));
+        }
         try {
             GroupPermissions[] neededRights = permissionFailure(pageRequest, req);
             if (neededRights != null) {
                 GroupPermissions[] userRights = req.getGroup() == null ? null : req.getGroup().getPermissions().toArray(GroupPermissions.values());
                 return pageRequest.onPermissionFailure(neededRights, userRights);
             } else {
-                return pageRequest.onRequest(ctx, req);
+                return pageRequest.onRequest(ctx, req, module);
             }
         } catch (Exception exe) {
             return pageRequest.onException(exe);
