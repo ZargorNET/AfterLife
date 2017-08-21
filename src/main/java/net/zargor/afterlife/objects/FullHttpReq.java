@@ -71,28 +71,31 @@ public class FullHttpReq extends DefaultFullHttpRequest {
             if (uri().substring(1).chars().allMatch(i -> (char) i == '?')) {
                 return null;
             }
-            if (uri().charAt(1) == '?') {
-                String newUri = uri().substring(1);
+            int firstQuestionMark = uri().indexOf("?");
+            if (firstQuestionMark == -1)
+                return null;
+            String newUri;
+            newUri = uri().substring(firstQuestionMark);
 
-                List<String> vars = new ArrayList<>();
-                String[] keys = newUri.split("&");
-                vars.addAll(Arrays.asList(keys));
-                Map<String, String> map = new HashMap<>();
-                vars.forEach(s -> {
-                    if (s.startsWith("?"))
-                        s = s.substring(1);
-                    if (s.contains("=")) {
-                        String[] keyValue = s.split("=");
-                        if (keyValue.length == 2) {
-                            map.put(keyValue[0], keyValue[1]);
-                        }
-                    } else {
-                        map.put(s, "true");
+
+            List<String> vars = new ArrayList<>();
+            String[] keys = newUri.split("&");
+            vars.addAll(Arrays.asList(keys));
+            Map<String, String> map = new HashMap<>();
+            vars.forEach(s -> {
+                if (s.startsWith("?"))
+                    s = s.substring(1);
+                if (s.contains("=")) {
+                    String[] keyValue = s.split("=");
+                    if (keyValue.length == 2) {
+                        map.put(keyValue[0], keyValue[1]);
                     }
-                });
-                map.forEach((s, s2) -> System.out.println(s + " : " + s2));
-                return map;
-            }
+                } else {
+                    map.put(s, "true");
+                }
+            });
+            map.forEach((s, s2) -> System.out.println(s + " : " + s2));
+            return map;
         }
         return null;
     }

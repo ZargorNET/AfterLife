@@ -22,7 +22,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.bson.Document;
 
 import java.util.*;
-import java.util.stream.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 
@@ -30,6 +31,7 @@ import javax.mail.internet.InternetAddress;
 public class Passwordreset extends Module {
 
     public static final int RESET_TIME = 45;
+    @Getter
     private final List<PasswordresetCode> codes;
 
     public Passwordreset() {
@@ -40,9 +42,18 @@ public class Passwordreset extends Module {
             while (true) {
                 synchronized (codes) {
                     Date d = new Date();
-                    codes.removeAll(codes.stream().filter(passwordresetCode -> passwordresetCode.expireTime < d.getTime())
-                            .filter(passwordresetCode -> DateUtils.addMinutes(new Date(passwordresetCode.getExpireTime()), RESET_TIME).getTime() <= d.getTime())
-                            .collect(Collectors.toList()));
+
+                    codes.removeAll(
+                            codes.stream()
+                                    .filter(passwordresetCode -> passwordresetCode.expireTime < d.getTime())
+                                    .filter(passwordresetCode -> DateUtils.addMinutes(new Date(passwordresetCode.getExpireTime()), RESET_TIME).getTime() <= d.getTime())
+                                    .collect(Collectors.toList()));
+
+                }
+                try {
+                    Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }, "Passwordreset code cleaner").start();
@@ -77,40 +88,42 @@ public class Passwordreset extends Module {
     }
 
     private DefaultFullHttpResponse sendCode(ChannelHandlerContext ctx, FullHttpReq req, ResourceBundle bundle, Document doc) throws Exception {
-        PasswordresetCode pc = getCodes().stream().filter(pc1 -> pc1.username.equalsIgnoreCase(doc.getString("name"))).findFirst().orElse(null);
-        if (pc != null) {
-            int remainingTime = new Date(DateUtils.addMinutes(new Date(pc.getExpireTime()), RESET_TIME).getTime() - new Date().getTime()).getMinutes();
-            if (remainingTime == 0)
-                remainingTime = 1;
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("too_fast_request"), remainingTime).getBytes("UTF-8")));
+        synchronized (codes) {
+            PasswordresetCode pc = codes.stream().filter(pc1 -> pc1.username.equalsIgnoreCase(doc.getString("name"))).findFirst().orElse(null);
+            if (pc != null) {
+                int remainingTime = new Date(DateUtils.addMinutes(new Date(pc.getExpireTime()), RESET_TIME).getTime() - new Date().getTime()).getMinutes();
+                if (remainingTime == 0)
+                    remainingTime = 1;
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("too_fast_request"), remainingTime).getBytes("UTF-8")));
+            }
+            String code = generateCode();
+            PasswordresetMail mail = new PasswordresetMail(req.getLanguage(), doc.getString("name"), code, WebServer.getInstance().getConfig().getValue("siteurl"), "Passwordreset", new Address[]{new InternetAddress(doc.getString("email"))}, null, null);
+            WebServer.getInstance().getMail().sendMail(mail);
+            codes.add(new PasswordresetCode(doc.getString("name"), code));
+            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(bundle.getString("success_send").getBytes("UTF-8")));
+
         }
-        String code = generateCode();
-        PasswordresetMail mail = new PasswordresetMail(req.getLanguage(), doc.getString("name"), code, WebServer.getInstance().getConfig().getValue("siteurl"), "Passwordreset", new Address[]{new InternetAddress(doc.getString("email"))}, null, null);
-        WebServer.getInstance().getMail().sendMail(mail);
-        getCodes().add(new PasswordresetCode(doc.getString("name"), code));
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(bundle.getString("success_send").getBytes("UTF-8")));
     }
 
     private DefaultFullHttpResponse reedemCode(ChannelHandlerContext ctx, FullHttpReq req, ResourceBundle bundle, String code) throws Exception {
-        String password = req.getPostAttributes().stream().filter(attribute -> attribute.getName().equalsIgnoreCase("password")).map((ThrowableFunction<? super Attribute, String>) Attribute::getValue).findFirst().orElse(null);
-        PasswordresetCode passwordresetCode = getCodes().stream().filter(pc -> pc.code.equals(code)).findFirst().orElse(null);
-        if (password == null)
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Bad request! Did you modify the post parameters?".getBytes("UTF-8")));
-        if (passwordresetCode == null || passwordresetCode.getExpireTime() < new Date().getTime() || !passwordresetCode.isValid())
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("code_invalid").getBytes("UTF-8")));
-        if (password.length() < 8)
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("password_too_short"), 8).getBytes("UTF-8")));
-        if (password.length() > 24)
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Password ist too long! Did you modify the page?".getBytes("UTF-8")));
-        if (!password.matches("[A-Za-z0-9\\-#]+"))
-            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("password_invalid_chars").getBytes("UTF-8")));
-        WebServer.getInstance().getMongoDB().getPlayerColl().updateOne(Filters.eq("name", passwordresetCode.username), Updates.set("password", WebServer.getInstance().getPasswordEncrypt().getAlgorithm().hashPassword(password)));
-        passwordresetCode.setValid(false);
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
-    }
+        synchronized (codes) {
+            String password = req.getPostAttributes().stream().filter(attribute -> attribute.getName().equalsIgnoreCase("password")).map((ThrowableFunction<? super Attribute, String>) Attribute::getValue).findFirst().orElse(null);
+            PasswordresetCode passwordresetCode = codes.stream().filter(pc -> pc.code.equals(code)).findFirst().orElse(null);
+            if (password == null)
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Bad request! Did you modify the post parameters?".getBytes("UTF-8")));
+            if (passwordresetCode == null || passwordresetCode.getExpireTime() < new Date().getTime() || !passwordresetCode.isValid())
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("code_invalid").getBytes("UTF-8")));
+            if (password.length() < 8)
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(String.format(bundle.getString("password_too_short"), 8).getBytes("UTF-8")));
+            if (password.length() > 24)
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Password ist too long! Did you modify the page?".getBytes("UTF-8")));
+            if (!password.matches("[A-Za-z0-9\\-#]+"))
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("password_invalid_chars").getBytes("UTF-8")));
+            WebServer.getInstance().getMongoDB().getPlayerColl().updateOne(Filters.eq("name", passwordresetCode.username), Updates.set("password", WebServer.getInstance().getPasswordEncrypt().getAlgorithm().hashPassword(password)));
+            passwordresetCode.setValid(false);
+            return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
 
-    public synchronized List<PasswordresetCode> getCodes() {
-        return codes;
+        }
     }
 
     @EqualsAndHashCode

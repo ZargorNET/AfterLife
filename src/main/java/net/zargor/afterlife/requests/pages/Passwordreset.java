@@ -25,7 +25,10 @@ public class Passwordreset extends PageRequest {
             res.headers().set(HttpHeaderNames.LOCATION, "/?needEmailCode");
             return res;
         }
-        net.zargor.afterlife.requests.modules.Passwordreset.PasswordresetCode code = ((net.zargor.afterlife.requests.modules.Passwordreset) associatedModule).getCodes().stream().filter(passwordresetCode -> passwordresetCode.getCode().equals(req.getGetParameters().get("code"))).findFirst().orElse(null);
+        net.zargor.afterlife.requests.modules.Passwordreset.PasswordresetCode code;
+        synchronized (((net.zargor.afterlife.requests.modules.Passwordreset) associatedModule).getCodes()) {
+            code = ((net.zargor.afterlife.requests.modules.Passwordreset) associatedModule).getCodes().stream().filter(passwordresetCode -> passwordresetCode.getCode().equals(req.getGetParameters().get("code"))).findFirst().orElse(null);
+        }
 
         if (code == null || !code.isValid() || code.getExpireTime() < new Date().getTime()) {
             DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
