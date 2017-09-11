@@ -5,13 +5,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import java.util.HashMap;
+import java.util.Optional;
 import net.zargor.afterlife.objects.FullHttpReq;
 import net.zargor.afterlife.permissionssystem.GroupPermissions;
 import net.zargor.afterlife.permissionssystem.RequiredPermissions;
 import net.zargor.afterlife.requests.Module;
 import net.zargor.afterlife.requests.PageRequest;
-
-import java.nio.charset.Charset;
 
 /**
  * Created by Zargor on 09.07.2017.
@@ -19,12 +19,14 @@ import java.nio.charset.Charset;
 @RequiredPermissions(neededPermissions = {GroupPermissions.DEFAULT})
 public class Dashboard extends PageRequest {
 
-    public Dashboard() {
-        super("/dashboard", null);
-    }
+	public Dashboard() {
+		super("/dashboard", null);
+	}
 
-    @Override
-    public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer("Under construction".getBytes(Charset.forName("UTF-8"))).retain());
-    }
+	@Override
+	public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
+		return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(this.renderHtml("dashboard", req.getLanguage(), Optional.of(new HashMap<String, String>() {{
+			put("title", "DASHBOARD MAN!");
+		}}))));
+	}
 }

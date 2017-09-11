@@ -11,12 +11,12 @@ import net.zargor.afterlife.requests.PageRequest;
 
 public class Test extends PageRequest {
 
-    public Test() {
-        super("/test", null);
-    }
+	public Test() {
+		super("/test", null);
+	}
 
-    @Override
-    public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
-    }
+	@Override
+	public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
+		return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
+	}
 }

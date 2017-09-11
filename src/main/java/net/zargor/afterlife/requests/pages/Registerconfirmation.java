@@ -16,27 +16,27 @@ import org.bson.Document;
 
 public class Registerconfirmation extends PageRequest {
 
-    public Registerconfirmation() {
-        super("/register", "register");
-    }
+	public Registerconfirmation() {
+		super("/register", "register");
+	}
 
-    @Override
-    public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
-        String code = req.getGetParameters().get("code");
-        if (code == null) {
-            DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
-            res.headers().set(HttpHeaderNames.LOCATION, "/?invalidRegisterCode");
-            return res;
-        }
-        Document doc = WebServer.getInstance().getMongoDB().getPlayerColl().find(Filters.eq("registerConfirmationCode", code)).first();
-        if (doc == null) {
-            DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
-            res.headers().set(HttpHeaderNames.LOCATION, "/?invalidRegisterCode");
-            return res;
-        }
-        WebServer.getInstance().getMongoDB().getPlayerColl().updateOne(Filters.eq("registerConfirmationCode", code), Updates.unset("registerConfirmationCode"));
-        DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
-        res.headers().set(HttpHeaderNames.LOCATION, "/?registerComplete");
-        return res;
-    }
+	@Override
+	public DefaultFullHttpResponse onRequest(ChannelHandlerContext ctx, FullHttpReq req, Module associatedModule) throws Exception {
+		String code = req.getGetParameters().get("code");
+		if (code == null) {
+			DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
+			res.headers().set(HttpHeaderNames.LOCATION, "/?invalidRegisterCode");
+			return res;
+		}
+		Document doc = WebServer.getInstance().getMongoDB().getPlayerColl().find(Filters.eq("registerConfirmationCode", code)).first();
+		if (doc == null) {
+			DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
+			res.headers().set(HttpHeaderNames.LOCATION, "/?invalidRegisterCode");
+			return res;
+		}
+		WebServer.getInstance().getMongoDB().getPlayerColl().updateOne(Filters.eq("registerConfirmationCode", code), Updates.unset("registerConfirmationCode"));
+		DefaultFullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT, Unpooled.EMPTY_BUFFER);
+		res.headers().set(HttpHeaderNames.LOCATION, "/?registerComplete");
+		return res;
+	}
 }

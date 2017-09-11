@@ -7,62 +7,61 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import java.nio.charset.Charset;
 import lombok.Data;
 import lombok.NonNull;
 import net.zargor.afterlife.WebServer;
 import net.zargor.afterlife.objects.FullHttpReq;
 import net.zargor.afterlife.permissionssystem.GroupPermissions;
 
-import java.nio.charset.Charset;
-
 @Data
 public abstract class Module extends WebRequest {
 
-    @NonNull
-    private final String name;
-    private final boolean disableable;
+	@NonNull
+	private final String name;
+	private final boolean disableable;
 
-    private boolean disabled = false;
+	private boolean disabled = false;
 
-    public Module(String name, boolean disableable) {
-        this.name = name;
-        this.disableable = disableable;
-    }
+	public Module(String name, boolean disableable) {
+		this.name = name;
+		this.disableable = disableable;
+	}
 
-    public final void enableModule() {
-        if (disabled) {
-            disabled = false;
-            onEnable();
-            WebServer.getInstance().getMongoDB().getModuleColl().updateOne(Filters.eq("name", getName()), Updates.set("disabled", false));
-        }
-    }
+	public final void enableModule() {
+		if (disabled) {
+			disabled = false;
+			onEnable();
+			WebServer.getInstance().getMongoDB().getModuleColl().updateOne(Filters.eq("name", getName()), Updates.set("disabled", false));
+		}
+	}
 
-    public final void disableModule() {
-        if (this.disableable && !disabled) {
-            disabled = true;
-            onDisable();
-            WebServer.getInstance().getMongoDB().getModuleColl().updateOne(Filters.eq("name", getName()), Updates.set("disabled", true));
-        }
-    }
+	public final void disableModule() {
+		if (this.disableable && !disabled) {
+			disabled = true;
+			onDisable();
+			WebServer.getInstance().getMongoDB().getModuleColl().updateOne(Filters.eq("name", getName()), Updates.set("disabled", true));
+		}
+	}
 
-    public void onEnable() {
-        System.out.println(String.format("Enabling Module: \"%s\"", name));
-    }
+	public void onEnable() {
+		System.out.println(String.format("Enabling Module: \"%s\"", name));
+	}
 
-    public void onDisable() {
-        System.out.println(String.format("Disabling Module: \"%s\"", name));
-    }
+	public void onDisable() {
+		System.out.println(String.format("Disabling Module: \"%s\"", name));
+	}
 
-    public abstract DefaultFullHttpResponse onModuleRequest(ChannelHandlerContext ctx, FullHttpReq req) throws Exception;
+	public abstract DefaultFullHttpResponse onModuleRequest(ChannelHandlerContext ctx, FullHttpReq req) throws Exception;
 
-    @Override
-    public DefaultFullHttpResponse onPermissionFailure(GroupPermissions[] neededRights, GroupPermissions[] usersRights) throws Exception {
-        DefaultFullHttpResponse res;
-        if (usersRights == null) {
-            res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("You need to be logged in!".getBytes(Charset.forName("UTF-8"))).retain());
-        } else {
-            res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer("Not enough permissions!".getBytes(Charset.forName("UTf-8"))).retain());
-        }
-        return res;
-    }
+	@Override
+	public DefaultFullHttpResponse onPermissionFailure(GroupPermissions[] neededRights, GroupPermissions[] usersRights) throws Exception {
+		DefaultFullHttpResponse res;
+		if (usersRights == null) {
+			res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("You need to be logged in!".getBytes(Charset.forName("UTF-8"))).retain());
+		} else {
+			res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer("Not enough permissions!".getBytes(Charset.forName("UTf-8"))).retain());
+		}
+		return res;
+	}
 }

@@ -20,12 +20,12 @@
         <div class="pmd-card pmd-z-depth text-center">
             <div class="pmd-card-title text-center">
                 <img src="/data/logo.jpg" alt="Logo" width="100" height="100">
-                <h3><span id="infoText">{{ login_with }} <strong>AfterLife</strong></span></h3>
+                <h3><span id="infoText">{{ login_login_with }} <strong>AfterLife</strong></span></h3>
             </div>
             <!--LOGIN-->
             <div class="pmd-card-body" id="login">
                 <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
-                    <label for="logName" class="control-label pmd-input-group-label">{{ username }}</label>
+                    <label for="logName" class="control-label pmd-input-group-label">{{ login_username }}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">perm_identity</i></div>
                         <input class="form-control" name="name" id="logName" maxlength="24"
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
-                    <label for="logPassword" class="control-label pmd-input-group-label">{{ password }}</label>
+                    <label for="logPassword" class="control-label pmd-input-group-label">{{ login_password }}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">lock_outline</i></div>
                         <input type="password" class="form-control" name="password" id="logPassword" maxlength="100"
@@ -46,23 +46,23 @@
                         <div class="checkbox pull-left">
                             <label class="pmd-checkbox pmd-checkbox-ripple-effect">
                                 <input type="checkbox" checked="" value="" id="logStayLogged">
-                                <span class="pmd-checkbox"> {{ stay_logged }}</span>
+                                <span class="pmd-checkbox"> {{ login_stay_logged }}</span>
                             </label>
                         </div>
                         <span class="pull-right" style="padding-top:8px;">
-							<a href="javascript:void(0);" class="login-pw">{{ password_forget }}</a>
+							<a href="javascript:void(0);" class="login-pw">{{ login_password_forget }}</a>
 						</span>
                     </div>
                     <a href="javascript:void(0)" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
-                       style="background-color: limegreen" onclick="loginButtonClick()">{{ login }}</a>
-                    <p class="redirection-link">{{ no_account }}
-                        <a href="javascript:void(0);" class="login-register">{{ create_an_account }}</a></p>
+                       style="background-color: limegreen" onclick="loginButtonClick()">{{ login_login }}</a>
+                    <p class="redirection-link">{{ login_no_account }}
+                        <a href="javascript:void(0);" class="login-register">{{ login_create_account_now }}</a></p>
                 </div>
             </div>
             <!--REGISTER-->
             <div class="pmd-card-body" id="register" style="display: none;">
                 <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
-                    <label for="regName" class="control-label pmd-input-group-label">{{ username }}</label>
+                    <label for="regName" class="control-label pmd-input-group-label">{{ login_username }}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">perm_identity</i></div>
                         <input class="form-control" name="name" id="regName" maxlength="24"
@@ -79,7 +79,7 @@
                     </div>
                 </div>
                 <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
-                    <label for="regPassword" class="control-label pmd-input-group-label">{{ password }}</label>
+                    <label for="regPassword" class="control-label pmd-input-group-label">{{ login_password }}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">lock_outline</i></div>
                         <input type="password" class="form-control" name="password" id="regPassword" maxlength="100"
@@ -89,9 +89,9 @@
                 <div id="regCaptcha" class="recaptcha"></div>
                 <div class="pmd-card-footer">
                     <a href="javascript:void(0);" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
-                       style="background-color: limegreen" onclick="registerButtonClick()">{{ register }}</a>
-                    <p class="redirection-link">{{ already_have_account }}
-                        <a href="javascript:void(0);" class="register-login">{{ login_now }}</a></p>
+                       style="background-color: limegreen" onclick="registerButtonClick()">{{ login_register }}</a>
+                    <p class="redirection-link">{{ login_already_have_account }}
+                        <a href="javascript:void(0);" class="register-login">{{ login_login_now }}</a></p>
                 </div>
             </div>
             <!--PASSWORDRESET-->
@@ -109,14 +109,15 @@
                 <div class="pmd-card-footer">
                     <a href="javascript:void(0);" type="button" class="btn pmd-ripple-effect btn-primary btn-block"
                        style="background-color: limegreen" onclick="passwordButtonClick()">{{ reset }}</a>
-                    <p class="redirection-link">{{ you_know_password }}
-                        <a href="javascript:void(0);" class="pw-login">{{ login_now }}</a></p>
+                    <p class="redirection-link">{{ login_password_known }}
+                        <a href="javascript:void(0);" class="pw-login">{{ login_login_now }}</a></p>
                 </div>
             </div>
             <!--PASSWORDRESET_SET_NEW_PASSWORD-->
             <div class="pmd-card-body" id="passwordResetCode" style="display: none">
                 <div class="form-group pmd-textfield pmd-textfield-floating-label text-left">
-                    <label for="pwCodePassword" class="control-label pmd-input-group-label">{{ new_password }}</label>
+                    <label for="pwCodePassword" class="control-label pmd-input-group-label">{{ login_new_password
+                        }}</label>
                     <div class="input-group">
                         <div class="input-group-addon"><i class="material-icons md-dark pmd-sm">lock_outline</i></div>
                         <input type="password" class="form-control" name="pwCodePassword" id="pwCodePassword"
@@ -162,7 +163,7 @@
                 register.fadeIn(500);
             });
             infoText.fadeOut(500, function () {
-                infoText.html("{{ register_with }} <strong>AfterLife</strong>");
+                infoText.html("{{ login_register_with }} <strong>AfterLife</strong>");
                 infoText.fadeIn(500);
             });
         });
@@ -171,7 +172,7 @@
                 login.fadeIn(500);
             });
             infoText.fadeOut(500, function () {
-                infoText.html("{{ login_with }} <strong>AfterLife</strong>");
+                infoText.html("{{ login_login_with }} <strong>AfterLife</strong>");
                 infoText.fadeIn(500);
             });
         });
@@ -180,7 +181,7 @@
                 pwreset.fadeIn(500);
             });
             infoText.fadeOut(500, function () {
-                infoText.html("<strong>Password reset</strong><br />{{ password_reset_info }}");
+                infoText.html("<strong>Password reset</strong><br />{{ login_passwordreset_info }}");
                 infoText.fadeIn(500);
             });
         });
@@ -189,7 +190,7 @@
                 login.fadeIn(500);
             });
             infoText.fadeOut(500, function () {
-                infoText.html("{{ login_with }} <strong>AfterLife</strong>");
+                infoText.html("{{ login_login_with }} <strong>AfterLife</strong>");
                 infoText.fadeIn(500);
             });
         });
@@ -200,32 +201,32 @@
     var form = $(".login-form")[0];
     $(document).ready(function () {
         if (url("?needLogin") !== undefined) {
-            alertBtn.attr('data-message', "{{ need_to_login }}");
+            alertBtn.attr('data-message', "{{ login_need_to_login }}");
             alertBtn.attr('data-type', "error");
             alertBtn.trigger("click")
         }
         if (url("?needEmailCode") !== undefined) {
-            alertBtn.attr('data-message', "{{ need_valid_email_code }}");
+            alertBtn.attr('data-message', "{{ login_email_code_invalid }}");
             alertBtn.attr('data-type', "error");
             alertBtn.trigger("click")
         }
         if (url("?emailCodeExpired") !== undefined) {
-            alertBtn.attr('data-message', "{{ emailCodeExpired }}");
+            alertBtn.attr('data-message', "{{ login_email_code_expired }}");
             alertBtn.attr('data-type', "error");
             alertBtn.trigger("click")
         }
         if (url("?emailCodeInput") !== undefined && url("?code") !== undefined) {
             login.hide();
             pwCodeReset.show();
-            infoText.html("{{ set_new_password_here }}")
+            infoText.html("{{ login_set_new_password }}")
         }
         if (url("?registerComplete") !== undefined) {
-            alertBtn.attr('data-message', "{{ registerComplete }}");
+            alertBtn.attr('data-message', "{{ login_register_complete }}");
             alertBtn.attr('data-type', "success");
             alertBtn.trigger("click")
         }
         if (url("?invalidRegisterCode") !== undefined) {
-            alertBtn.attr('data-message', "{{ invalidRegisterCode }}");
+            alertBtn.attr('data-message', "{{ login_invalid_register_code }}");
             alertBtn.attr('data-type', "error");
             alertBtn.trigger("click")
         }

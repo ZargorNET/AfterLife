@@ -4,7 +4,7 @@
     </div>
     <div id="body">
         <p>Hello ${name}!<br/>
-            Apparently you registered at ${siteurl]!<br/>
+            Apparently you registered at ${siteurl}!<br/>
             If thats not the case, you can ignore this email.
         </p>
         <br/>

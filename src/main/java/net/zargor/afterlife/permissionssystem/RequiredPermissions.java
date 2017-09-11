@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequiredPermissions {
 
-    GroupPermissions[] neededPermissions();
+	GroupPermissions[] neededPermissions();
 }

@@ -1,9 +1,8 @@
 package net.zargor.afterlife.objects;
 
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.*;
 
 /**
  * Simple user
@@ -12,9 +11,9 @@ import java.util.*;
 @AllArgsConstructor
 public class User {
 
-    private String name;
-    private String email;
-    private byte[] avatar;
-    private Map<String, String> informations;
-    private Group group;
+	private String name;
+	private String email;
+	private byte[] avatar;
+	private Map<String, String> informations;
+	private Group group;
 }

@@ -10,8 +10,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class Session {
 
-    private String id;
-    private String name;
-    private Group group;
-    private Long expireDate;
+	private String id;
+	private String name;
+	private Group group;
+	private Long expireDate;
 }
