@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.multipart.Attribute;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class Passwordreset extends Module {
 			String code = generateCode();
 			PasswordresetMail mail = new PasswordresetMail(req.getLanguage(), doc.getString("name"), code, WebServer.getInstance().getConfig().getValue("siteurl"), "Passwordreset", new Address[]{new InternetAddress(doc.getString("email"))}, null, null);
 			WebServer.getInstance().getMail().sendMail(mail);
-			codes.add(new PasswordresetCode(doc.getString("name"), code));
+			codes.add(new PasswordresetCode(doc.getString("name"), code, ((InetSocketAddress) ctx.channel().remoteAddress()).getHostString()));
 			values.put("mins", String.valueOf(15));
 			return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(StrSubstitutor.replace(bundle.getString("passwordreset_email_successfully_send"), values).getBytes("UTF-8")));
 
@@ -133,6 +134,9 @@ public class Passwordreset extends Module {
 				return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Bad request! Did you modify the post parameters?".getBytes("UTF-8")));
 			if (passwordresetCode == null || passwordresetCode.getExpireTime() < new Date().getTime() || !passwordresetCode.isValid())
 				return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("code_invalid").getBytes("UTF-8")));
+			if (!passwordresetCode.address.equals(((InetSocketAddress) ctx.channel().remoteAddress()).getHostString())) {
+				return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(bundle.getString("pwreset_wrong_address").getBytes("UTF-8")).retain());
+			}
 			if (password.length() < 8) {
 				values.put("name", "Password");
 				values.put("min", "8");
@@ -162,12 +166,14 @@ public class Passwordreset extends Module {
 		private final String username;
 		private final String code;
 		private long expireTime;
+		private String address;
 		@Setter
 		private boolean valid = true;
 
-		public PasswordresetCode(String username, String code) {
+		public PasswordresetCode(String username, String code, String address) {
 			this.username = username;
 			this.code = code;
+			this.address = address;
 			expireTime = DateUtils.addMinutes(new Date(), 15).getTime();
 		}
 	}
