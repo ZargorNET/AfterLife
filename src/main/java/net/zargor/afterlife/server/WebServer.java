@@ -43,7 +43,6 @@ public class WebServer {
 
 	private Channel channel;
 	private boolean epollAvailable;
-
 	public WebServer() {
 		instance = this;
 		config = new Config();
@@ -56,7 +55,6 @@ public class WebServer {
 		bootstrap = new ServerBootstrap();
 		gson = new Gson();
 		passwordEncrypt = new PasswordEncrypt();
-
 		EventLoopGroup masterGroup = epollAvailable ? new EpollEventLoopGroup() : new NioEventLoopGroup();
 		EventLoopGroup workerGroup = epollAvailable ? new EpollEventLoopGroup() : new NioEventLoopGroup();
 

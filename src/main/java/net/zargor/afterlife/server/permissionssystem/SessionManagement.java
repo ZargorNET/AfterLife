@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import net.zargor.afterlife.server.WebServer;
 import net.zargor.afterlife.server.objects.Group;
 import net.zargor.afterlife.server.objects.Session;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 /**
@@ -62,11 +63,16 @@ public class SessionManagement {
 	}
 
 	public String createCookieString(String name, Group group, boolean secure) {
+		Validate.notNull(name);
+		Validate.notNull(group);
 		return String.format("z-sID=%s; Expires=%s; HttpOnly; %s", addSession(name, group), DateUtils.addDays(new Date(), 1).toGMTString(), secure ? "Secure;" : "");
 	}
 
-	public String createCookieString(String name, String groupName, boolean secure) {
-		return String.format("z-sID=%s; Expires=%s; HttpOnly; %s", addSession(name, WebServer.getInstance().getGroupManagement().getGroup(groupName)), DateUtils.addDays(new Date(), 1).toGMTString(), secure ? "Secure;" : "");
+	public String createCookieString(String name, Date expireDate, String groupName, boolean secure) {
+		Validate.notNull(name);
+		Validate.notNull(expireDate);
+		Validate.notNull(groupName);
+		return String.format("z-sID=%s; Expires=%s; HttpOnly; %s", addSession(name, WebServer.getInstance().getGroupManagement().getGroup(groupName)), expireDate.toGMTString(), secure ? "Secure;" : "");
 	}
 
 	private String generateSessionID() {

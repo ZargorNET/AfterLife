@@ -16,7 +16,6 @@ public abstract class PasswordHashingAlgorithm {
 	 * Hashes the given passwords and returns it
 	 *
 	 * @param password The unhashed password
-	 * @param salt     The salt from the config
 	 * @return The hashed password
 	 */
 	public abstract String hashPassword(String password);
@@ -26,7 +25,6 @@ public abstract class PasswordHashingAlgorithm {
 	 *
 	 * @param unhashed The unhashed password
 	 * @param hashed   The hashed password
-	 * @param salt     The salt from the config
 	 * @return True if they're matching else false
 	 */
 	public abstract boolean checkPassword(String unhashed, String hashed);

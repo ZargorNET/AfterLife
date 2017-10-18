@@ -18,7 +18,7 @@ import net.zargor.afterlife.server.requests.PageRequest;
  */
 public class PageRequestHandler extends ClassHandler<PageRequest> {
 
-	public PageRequestHandler() {
+	PageRequestHandler() {
 		super(new ArrayList<>());
 	}
 

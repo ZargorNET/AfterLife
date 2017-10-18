@@ -17,7 +17,7 @@ public class RequestUtils {
 	 * @param path The path
 	 * @return The bytes or null
 	 */
-	protected static byte[] readResourceFile(String path, Class clazz) throws IOException {
+	static byte[] readResourceFile(String path, Class clazz) throws IOException {
 		InputStream in = clazz.getResourceAsStream(path);
 		if (in == null)
 			return null;
@@ -35,7 +35,7 @@ public class RequestUtils {
 	 * @param req The request
 	 * @return language in 2 chars
 	 */
-	protected static String getLanguage(FullHttpRequest req) {
+	static String getLanguage(FullHttpRequest req) {
 		String langFrom = req.headers().get(HttpHeaderNames.ACCEPT_LANGUAGE);
 		if (langFrom == null)
 			langFrom = "en";

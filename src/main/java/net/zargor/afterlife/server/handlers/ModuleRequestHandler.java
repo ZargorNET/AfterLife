@@ -22,7 +22,7 @@ import org.bson.Document;
 public class ModuleRequestHandler extends ClassHandler<Module> {
 
 
-	public ModuleRequestHandler() {
+	ModuleRequestHandler() {
 		super(new ArrayList<>());
 	}
 

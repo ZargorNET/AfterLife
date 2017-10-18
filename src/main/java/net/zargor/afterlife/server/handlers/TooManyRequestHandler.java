@@ -12,7 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
-public class TooManyRequestHandler {
+class TooManyRequestHandler {
 
 	private static final int REQUESTLIMIT_GET = 100;
 	private static final int REQUESTLIMIT_POST = 50;

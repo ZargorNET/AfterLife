@@ -21,7 +21,7 @@ abstract class ClassHandler<T extends WebRequest> {
 
 	private List<T> list;
 
-	public ClassHandler(List<T> list) {
+	ClassHandler(List<T> list) {
 		this.list = list;
 	}
 

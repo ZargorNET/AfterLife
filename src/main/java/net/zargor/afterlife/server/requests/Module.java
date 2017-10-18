@@ -7,7 +7,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.multipart.Attribute;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import net.zargor.afterlife.server.WebServer;
@@ -63,5 +68,26 @@ public abstract class Module extends WebRequest {
 			res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN, Unpooled.copiedBuffer("Not enough permissions!".getBytes(Charset.forName("UTf-8"))).retain());
 		}
 		return res;
+	}
+
+	protected PostParameters getPostParametersAndCheckNull(FullHttpReq req, String... names) {
+		List<Attribute> objs = new ArrayList<>();
+		for (String name : names) {
+			Optional<Attribute> opt = req.getPostAttributes().stream().filter(attribute -> attribute.getName().equals(name)).findFirst();
+			if (!opt.isPresent()) {
+				return new PostParameters(null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Invalid post parameters!".getBytes())));
+			}
+			objs.add(opt.get());
+		}
+		PostParameters postParameters = new PostParameters(objs.toArray(new Attribute[0]), null);
+		return objs.size() == 0 ? null : postParameters;
+	}
+
+	@Data
+	@AllArgsConstructor
+	protected class PostParameters {
+
+		private final Attribute[] attributes;
+		private final DefaultFullHttpResponse response;
 	}
 }
